@@ -5,7 +5,7 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Live Coin Price</h1>
+    <h1 id="priceText">Live Coin Price</h1>
     <canvas id="lineChart" width="800" height="800" style="border:1px solid #000;"></canvas>
 </div>
 
@@ -28,8 +28,9 @@
 
             const fetchCoinData = async () => {
                 try {
-                    // Fetch the latest coin price data from an API
-
+                    const response = await fetch('https://localhost:7006/latestprice'); 
+                    const result = await response.json();
+                    const currentPrice = result.price.close_price;
                     const timestamp = new Date().toLocaleTimeString();
 
                     // Update labels and data
@@ -38,8 +39,30 @@
                         data.shift();
                     }
                     labels.push(timestamp);
-                    data.push(Math.random());
 
+                    var element = document.getElementById("priceText");
+
+                    // Fetch data from the API URL
+                    fetch('https://localhost:7006/latestprice')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            var price = data.price.close_price
+                            console.log(price);
+
+                            var element = document.getElementById("priceText");
+                            element.innerText = price;
+                        })
+                        .catch(error => {
+                            console.error('There was a problem with the fetch operation:', error);
+                        });
+
+
+                    data.push(currentPrice);
                     updateChart();
                 } catch (error) {
                     console.error('Error fetching coin data:', error);
@@ -63,8 +86,8 @@
 
                 // Create the gradient for the fill
                 const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
-                gradient.addColorStop(0, 'rgba(75, 192, 192, 0.5)');
-                gradient.addColorStop(1, 'rgba(75, 192, 192, 0)');
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 1.0)');
 
                 // Draw the data points and lines with gradient fill
                 ctx.beginPath();
