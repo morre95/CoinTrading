@@ -1,5 +1,8 @@
+using CoinTrading.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace CoinTrading.Pages
 {
@@ -14,7 +17,18 @@ namespace CoinTrading.Pages
 
         public void OnGet()
         {
+            UserContext user = new UserContext();
 
+            foreach (var u in user.Users)
+            {
+                Debug.WriteLine($"{u.Username}");
+                Debug.WriteLine($"{u.Email}");
+                Debug.WriteLine($"{u.Password}");
+            }
+
+            HttpContext.Session.SetString("Username", "true");
         }
     }
+
+    
 }
