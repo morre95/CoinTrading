@@ -14,7 +14,9 @@ namespace CoinTrading.Pages
 
         public JsonResult OnGet()
         {
-            return new JsonResult(new { price = DB.Prices.FirstOrDefault() });
+            var lastPrice = DB.Prices.OrderByDescending(price => price.timestamp).FirstOrDefault();
+
+            return new JsonResult(new { price = lastPrice });
         }
     }
 }
