@@ -1,8 +1,9 @@
 using CoinTrading.Api;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Security.Cryptography;
+using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
+using System.Diagnostics;
 
 namespace CoinTrading.Pages
 {
@@ -27,13 +28,37 @@ namespace CoinTrading.Pages
             var password = Request.Form["password"];
             var passwordAgain = Request.Form["passwordAgain"];
 
-            if (password != passwordAgain) return Page();
+            int usernameCount = DB.Users.FromSql($"SELECT * FROM Users WHERE username = '{username}'").Count();
+            Debug.WriteLine($"Användarnamn count: {usernameCount}");
+
+            // TODO: Bör inte skickas till Error
+            if (usernameCount > 0) 
+            {
+                Debug.WriteLine($"Användarnamn upptaget");
+                return RedirectToPage("./Error");
+            }
+
+            int emailCount = DB.Users.FromSql($"SELECT * FROM Users WHERE email = {email}").ToList().Count;
+
+            Debug.WriteLine($"Email count: {emailCount}");
+            // TODO: Bör inte skickas till Error
+            if (usernameCount > 0)
+            {
+                Debug.WriteLine($"Email upptaget");
+                return RedirectToPage("./Error");
+            }
+
+            if (password != passwordAgain)
+            {
+                Debug.WriteLine($"Lösenorden stämmer inte");
+                return RedirectToPage("./Error");
+            }
 
             Users user = new();
 
             user.Username = username;
             user.Email = email;
-            user.Password = GetPasswordHash(password);
+            user.Password = Helper.GetPasswordHash(password);
 
             DB.Add(user);
             DB.SaveChanges();
@@ -41,16 +66,7 @@ namespace CoinTrading.Pages
             return RedirectToPage("./Index");
         }
 
-        private string GetPasswordHash(string password)
-        {
-            byte[] salt = RandomNumberGenerator.GetBytes(128 / 8); 
 
-            return Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: password!,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 100000,
-                numBytesRequested: 256 / 8));
-        }
+
     }
 }

@@ -40,7 +40,7 @@ namespace CoinTrading
             app.UseAuthorization();
 
             // Auto redirect to Game page for faster testing ****************
-            app.Use(async (context, next) =>
+            /*app.Use(async (context, next) =>
             {
                 if (context.Request.Path == "/")
                 {
@@ -48,7 +48,7 @@ namespace CoinTrading
                     return;
                 }
                 await next();
-            });
+            });*/
             // ***************************************************************
 
 

@@ -27,9 +27,9 @@ namespace CoinTrading.Api
         public string Email { get; set; }
     }
 
-    [Keyless]
     public class Prices
     {
+        public int Id { get; set; }
         public string symbol { get; set; }
         public double open_price { get; set; }
         public double close_price { get; set; }
