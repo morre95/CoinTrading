@@ -34,10 +34,11 @@ namespace CoinTrading.Pages
             var password = Request.Form["password"];
 
             //var user = DB.Users.FirstOrDefault(user => user.Username == username && user.Password == Helper.GetPasswordHash(password));
-            //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE username = '{username}' AND password = '{Helper.GetPasswordHash(password)}'").FirstOrDefault();
-            var user = DB.Users.FromSql($"SELECT * FROM Users").FirstOrDefault();
+            //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE (username = '{username}' AND password = '{Helper.GetPasswordHash(password)}')").FirstOrDefault();
+            var user = DB.Users.FromSql($"SELECT * FROM Users WHERE password = '{Helper.GetPasswordHash(password)}'").FirstOrDefault();
             //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE username = {username} AND password = {Helper.GetPasswordHash(password)}").First();
 
+            Debug.WriteLine($"{username} {password}, '{Helper.GetPasswordHash(password)}'");
             if (user == null) 
             { 
                 return RedirectToPage("./Error");
