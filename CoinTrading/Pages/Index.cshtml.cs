@@ -17,6 +17,7 @@ namespace CoinTrading.Pages
 
         public void OnGet()
         {
+            Debug.WriteLine($"'{Helper.GetPasswordHash("1234")}'");
         }
     }
 
