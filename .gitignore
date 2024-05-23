@@ -362,4 +362,3 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /CoinTrading/Data/sqlite3.exe
-/CoinTrading/Data/data.db
