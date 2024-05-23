@@ -35,8 +35,18 @@ namespace CoinTrading.Pages
 
             //var user = DB.Users.FirstOrDefault(user => user.Username == username && user.Password == Helper.GetPasswordHash(password));
             //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE (username = '{username}' AND password = '{Helper.GetPasswordHash(password)}')").FirstOrDefault();
-            var user = DB.Users.FromSql($"SELECT * FROM Users WHERE password = '{Helper.GetPasswordHash(password)}'").FirstOrDefault();
+            //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE password = {Helper.GetPasswordHash(password)}").FirstOrDefault();
             //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE username = {username} AND password = {Helper.GetPasswordHash(password)}").First();
+
+            Users? user = null;
+            foreach (Users item in DB.Users) 
+            {
+                if (item.Username == username && item.Password == Helper.GetPasswordHash(password)) 
+                {
+                    user = item;
+                    break;
+                }
+            }
 
             Debug.WriteLine($"{username} {password}, '{Helper.GetPasswordHash(password)}'");
             if (user == null) 
