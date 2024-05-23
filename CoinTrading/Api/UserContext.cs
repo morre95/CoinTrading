@@ -27,7 +27,7 @@ namespace CoinTrading.Api
         public string Email { get; set; }
     }
 
-    [Keyless]
+    
     public class Prices
     {
         public int Id { get; set; }
