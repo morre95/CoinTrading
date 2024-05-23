@@ -28,7 +28,7 @@ namespace CoinTrading.Pages
             var password = Request.Form["password"];
             var passwordAgain = Request.Form["passwordAgain"];
 
-            int usernameCount = DB.Users.FromSql($"SELECT * FROM Users WHERE username = '{username}'").Count();
+            /*int usernameCount = DB.Users.FromSql($"SELECT * FROM Users WHERE username = '{username}'").Count();
             Debug.WriteLine($"Användarnamn count: {usernameCount}");
 
             // TODO: Bör inte skickas till Error
@@ -41,6 +41,34 @@ namespace CoinTrading.Pages
             int emailCount = DB.Users.FromSql($"SELECT * FROM Users WHERE email = {email}").ToList().Count;
 
             Debug.WriteLine($"Email count: {emailCount}");
+            // TODO: Bör inte skickas till Error
+            if (usernameCount > 0)
+            {
+                Debug.WriteLine($"Email upptaget");
+                return RedirectToPage("./Error");
+            }*/
+
+            int usernameCount = 0, emailCount = 0;
+            foreach (Users u in DB.Users)
+            {
+                if (u.Username == username)
+                {
+                    usernameCount++;
+                }
+
+                if (u.Email == email) 
+                {
+                    emailCount++;
+                }
+            }
+
+            // TODO: Bör inte skickas till Error
+            if (usernameCount > 0)
+            {
+                Debug.WriteLine($"Användarnamn upptaget");
+                return RedirectToPage("./Error");
+            }
+
             // TODO: Bör inte skickas till Error
             if (usernameCount > 0)
             {
