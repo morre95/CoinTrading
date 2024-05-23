@@ -30,7 +30,7 @@
                 try {
                     const response = await fetch('https://localhost:7006/latestprice'); 
                     const result = await response.json();
-                    const currentPrice = result.price.close_price;
+                    currentPrice = result.price.close_price;
                     const timestamp = new Date().toLocaleTimeString();
 
                     // Update labels and data
@@ -38,31 +38,13 @@
                         labels.shift();
                         data.shift();
                     }
-                    labels.push(timestamp);
 
+                    currentPrice = currentPrice - 69800.0; // TEMP SOLUTUION TO BIGGER PROBLEM
                     var element = document.getElementById("priceText");
 
-                    // Fetch data from the API URL
-                    fetch('https://localhost:7006/latestprice')
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            var price = data.price.close_price
-                            console.log(price);
-
-                            var element = document.getElementById("priceText");
-                            element.innerText = price;
-                        })
-                        .catch(error => {
-                            console.error('There was a problem with the fetch operation:', error);
-                        });
-
-
+                    element.innerText = currentPrice;
                     data.push(currentPrice);
+                    labels.push(timestamp);
                     updateChart();
                 } catch (error) {
                     console.error('Error fetching coin data:', error);
