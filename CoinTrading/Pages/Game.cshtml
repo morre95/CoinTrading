@@ -1,0 +1,110 @@
+﻿@page
+@model CoinTrading.Pages.GameModel
+@{
+    ViewData["Title"] = "Game";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Live Coin Price</h1>
+    <canvas id="lineChart" width="800" height="800" style="border:1px solid #000;"></canvas>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const canvas = document.getElementById('lineChart');
+            const ctx = canvas.getContext('2d');
+
+            const padding = 50;
+            const width = canvas.width;
+            const height = canvas.height;
+            const graphWidth = width - padding * 2;
+            const graphHeight = height - padding * 2;
+
+            let labels = [];
+            let data = [];
+
+            const maxDataPoints = 300; // Assuming 1 data point per second for 5 minutes
+
+            const fetchCoinData = async () => {
+                try {
+                    // Fetch the latest coin price data from an API
+
+                    const timestamp = new Date().toLocaleTimeString();
+
+                    // Update labels and data
+                    if (labels.length >= maxDataPoints) {
+                        labels.shift();
+                        data.shift();
+                    }
+                    labels.push(timestamp);
+                    data.push(Math.random());
+
+                    updateChart();
+                } catch (error) {
+                    console.error('Error fetching coin data:', error);
+                }
+            };
+
+            const updateChart = () => {
+                // Clear canvas
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw the X and Y axis
+                ctx.beginPath();
+                ctx.moveTo(padding, padding);
+                ctx.lineTo(padding, height - padding);
+                ctx.lineTo(width - padding, height - padding);
+                ctx.stroke();
+
+                // Calculate the max value to scale the graph
+                const maxValue = Math.max(...data);
+                const scaleY = graphHeight / maxValue;
+
+                // Create the gradient for the fill
+                const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
+                gradient.addColorStop(0, 'rgba(75, 192, 192, 0.5)');
+                gradient.addColorStop(1, 'rgba(75, 192, 192, 0)');
+
+                // Draw the data points and lines with gradient fill
+                ctx.beginPath();
+                ctx.moveTo(padding, height - padding - data[0] * scaleY);
+                data.forEach((value, index) => {
+                    const x = padding + (graphWidth / (labels.length - 1)) * index;
+                    const y = height - padding - value * scaleY;
+                    ctx.lineTo(x, y);
+                });
+                ctx.lineTo(width - padding, height - padding);
+                ctx.lineTo(padding, height - padding);
+                ctx.closePath();
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Draw the line on top of the gradient fill
+                ctx.beginPath();
+                ctx.moveTo(padding, height - padding - data[0] * scaleY);
+                data.forEach((value, index) => {
+                    const x = padding + (graphWidth / (labels.length - 1)) * index;
+                    const y = height - padding - value * scaleY;
+                    ctx.lineTo(x, y);
+                });
+                ctx.strokeStyle = 'rgba(75, 192, 192, 1)';
+                ctx.stroke();
+
+                // Draw the labels
+                ctx.fillStyle = '#000';
+                ctx.textAlign = 'center';
+                labels.forEach((label, index) => {
+                    if (index % 60 === 0 || index === labels.length - 1) { // Display label every 60 seconds or at the end
+                        const x = padding + (graphWidth / (labels.length - 1)) * index;
+                        const y = height - padding + 20;
+                        ctx.fillText(label, x, y);
+                    }
+                });
+            };
+
+            // Fetch new data every second
+            setInterval(fetchCoinData, 1000);
+        });
+    </script>
+}

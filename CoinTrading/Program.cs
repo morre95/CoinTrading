@@ -26,7 +26,21 @@ namespace CoinTrading
 
             app.UseAuthorization();
 
+            // Auto redirect to Game page for faster testing ****************
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path == "/")
+                {
+                    context.Response.Redirect("/Game");
+                    return;
+                }
+                await next();
+            });
+            // ***************************************************************
+
+
             app.MapRazorPages();
+
 
             app.Run();
         }
