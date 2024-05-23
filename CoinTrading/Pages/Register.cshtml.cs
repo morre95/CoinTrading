@@ -1,8 +1,6 @@
 using CoinTrading.Api;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Security.Cryptography;
 
 namespace CoinTrading.Pages
 {
@@ -33,7 +31,7 @@ namespace CoinTrading.Pages
 
             user.Username = username;
             user.Email = email;
-            user.Password = GetPasswordHash(password);
+            user.Password = Helper.GetPasswordHash(password);
 
             DB.Add(user);
             DB.SaveChanges();
@@ -41,16 +39,6 @@ namespace CoinTrading.Pages
             return RedirectToPage("./Index");
         }
 
-        private string GetPasswordHash(string password)
-        {
-            byte[] salt = RandomNumberGenerator.GetBytes(128 / 8); 
-
-            return Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: password!,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 100000,
-                numBytesRequested: 256 / 8));
-        }
+        
     }
 }

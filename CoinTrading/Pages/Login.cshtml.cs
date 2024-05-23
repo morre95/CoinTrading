@@ -20,8 +20,20 @@ namespace CoinTrading.Pages
 
         public IActionResult OnPost()
         {
-            var name = Request.Form["Name"];
-            var email = Request.Form["Email"];
+            var username = Request.Form["username"];
+            var password = Request.Form["password"];
+
+            foreach (var u in DB.Users)
+            {
+                Console.WriteLine($"Username: {u.Username}, {u.Password}");
+            }
+
+            var user = DB.Users.FirstOrDefault(user => user.Username == username && user.Password == Helper.GetPasswordHash(password));
+
+            if (user == null) 
+            { 
+                return RedirectToPage("./Error");
+            }
 
             return RedirectToPage("./Index");
         }
