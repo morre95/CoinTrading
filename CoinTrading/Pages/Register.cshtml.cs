@@ -9,7 +9,6 @@ namespace CoinTrading.Pages
 {
     public class RegisterModel : PageModel
     {
-
         UserContext DB;
         public RegisterModel()
         {
