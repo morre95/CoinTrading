@@ -1,0 +1,28 @@
+﻿@page
+@model CoinTrading.Pages.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<form method="POST">
+    <div class="form-group">
+        <label for="inputUsername">Email address</label>
+        <input type="username" name="username" class="form-control" id="inputUsername" aria-describedby="usernameHelp" placeholder="Enter username">
+        <small id="usernameHelp" class="form-text text-muted">We'll will allways share your login with all our hackers.</small>
+    </div>
+    <div class="form-group">
+        <label for="inputEmail">Email address</label>
+        <input type="email" name="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email">
+        <small id="emailHelp" class="form-text text-muted">We'll allways share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        <label for="inputPassword">Password</label>
+        <input type="password" name="password" class="form-control" id="inputPassword" placeholder="Password">
+    </div>
+
+    <div class="form-group">
+        <label for="inputPasswordAgain">Password</label>
+        <input type="password" name="passwordAgain" class="form-control" id="inputPasswordAgain" placeholder="Password again">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
