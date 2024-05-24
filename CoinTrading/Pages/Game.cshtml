@@ -3,10 +3,16 @@
 @{
     ViewData["Title"] = "Game";
 }
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+    }
+</style>
 
 <div class="text-center">
     <h1 id="priceText">Live Coin Price</h1>
-    <canvas id="lineChart" width="800" height="800" style="border:1px solid #000;"></canvas>
+    <canvas id="lineChart" width="1200" height="800" style="border:1px solid #000; background-color: #0D2738;"></canvas>
 </div>
 
 @section Scripts {
@@ -15,11 +21,10 @@
             const canvas = document.getElementById('lineChart');
             const ctx = canvas.getContext('2d');
 
-            const padding = 50;
             const width = canvas.width;
             const height = canvas.height;
-            const graphWidth = width - padding * 2;
-            const graphHeight = height - padding * 2;
+            const graphWidth = width;
+            const graphHeight = height;
 
             let labels = [];
             let data = [];
@@ -38,8 +43,6 @@
                         labels.shift();
                         data.shift();
                     }
-
-                    currentPrice = currentPrice - 69800.0; // TEMP SOLUTUION TO BIGGER PROBLEM
                     var element = document.getElementById("priceText");
 
                     element.innerText = currentPrice;
@@ -57,43 +60,47 @@
 
                 // Draw the X and Y axis
                 ctx.beginPath();
-                ctx.moveTo(padding, padding);
-                ctx.lineTo(padding, height - padding);
-                ctx.lineTo(width - padding, height - padding);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, height);
+                ctx.lineTo(width, height);
                 ctx.stroke();
+                
 
                 // Calculate the max value to scale the graph
                 const maxValue = Math.max(...data);
-                const scaleY = graphHeight / maxValue;
+                const minValue = Math.min(...data);
+
+                const shiftY = minValue - (maxValue - minValue) * 0.3;
+                const scaleY = graphHeight / ((maxValue - minValue)*1.5);
 
                 // Create the gradient for the fill
-                const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
-                gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
-                gradient.addColorStop(1, 'rgba(0, 0, 0, 1.0)');
+                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                gradient.addColorStop(0, 'rgba(25, 98, 139, 0.7)');
+                gradient.addColorStop(1, 'rgba(25, 98, 139, 0.0)');
 
                 // Draw the data points and lines with gradient fill
                 ctx.beginPath();
-                ctx.moveTo(padding, height - padding - data[0] * scaleY);
+                ctx.moveTo(0, height - (data[0]-shiftY) * scaleY);
                 data.forEach((value, index) => {
-                    const x = padding + (graphWidth / (labels.length - 1)) * index;
-                    const y = height - padding - value * scaleY;
+                    const x = (graphWidth / (labels.length - 1)) * index;
+                    const y = height - (value-shiftY) * scaleY;
                     ctx.lineTo(x, y);
                 });
-                ctx.lineTo(width - padding, height - padding);
-                ctx.lineTo(padding, height - padding);
+                ctx.lineTo(width, height);
+                ctx.lineTo(0, height);
                 ctx.closePath();
                 ctx.fillStyle = gradient;
                 ctx.fill();
 
                 // Draw the line on top of the gradient fill
                 ctx.beginPath();
-                ctx.moveTo(padding, height - padding - data[0] * scaleY);
+                ctx.moveTo(0, height - (data[0]-shiftY) * scaleY);
                 data.forEach((value, index) => {
-                    const x = padding + (graphWidth / (labels.length - 1)) * index;
-                    const y = height - padding - value * scaleY;
+                    const x = (graphWidth / (labels.length - 1)) * index;
+                    const y = height - (value-shiftY) * scaleY;
                     ctx.lineTo(x, y);
                 });
-                ctx.strokeStyle = 'rgba(75, 192, 192, 1)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
                 ctx.stroke();
 
                 // Draw the labels
@@ -101,8 +108,8 @@
                 ctx.textAlign = 'center';
                 labels.forEach((label, index) => {
                     if (index % 60 === 0 || index === labels.length - 1) { // Display label every 60 seconds or at the end
-                        const x = padding + (graphWidth / (labels.length - 1)) * index;
-                        const y = height - padding + 20;
+                        const x = (graphWidth / (labels.length - 1)) * index;
+                        const y = height + 20;
                         ctx.fillText(label, x, y);
                     }
                 });
