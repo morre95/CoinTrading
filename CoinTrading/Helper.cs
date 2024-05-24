@@ -2,14 +2,14 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CoinTrading.Pages
+namespace CoinTrading
 {
     public class Helper
     {
         public static string GetPasswordHash(string password)
         {
             //byte[] salt = RandomNumberGenerator.GetBytes(128 / 8);
-            
+
             // TODO: kolla strängen...
             byte[] salt = Encoding.ASCII.GetBytes("this is a random salt Amir should change. Erik refuses");
 
