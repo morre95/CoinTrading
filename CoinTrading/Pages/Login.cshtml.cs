@@ -21,9 +21,9 @@ namespace CoinTrading.Pages
         public void OnGet(string? text)
         {
             Message = text;
-            string? username = HttpContext.Session.GetString("Username");
+            string? username = HttpContext.Session.GetUsername();
 
-            if (username != null) ViewData["Username"] = HttpContext.Session.GetString("Username");
+            if (username != null) ViewData["Username"] = username;
         }
 
         public IActionResult OnPost()
@@ -31,32 +31,18 @@ namespace CoinTrading.Pages
             var username = Request.Form["username"];
             var password = Request.Form["password"];
 
-            //var user = DB.Users.FirstOrDefault(user => user.Username == username && user.Password == Helper.GetPasswordHash(password));
-            //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE (username = '{username}' AND password = '{Helper.GetPasswordHash(password)}')").FirstOrDefault();
-            //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE password = {Helper.GetPasswordHash(password)}").FirstOrDefault();
-            //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE username = {username} AND password = {Helper.GetPasswordHash(password)}").First();
+            IQueryable<Users> users = from u in DB.Users
+                           where u.Username == username.ToString() && u.Password == Helper.GetPasswordHash(password.ToString())
+                           select u;
 
-            Users? user = null;
-            foreach (Users item in DB.Users) 
+            if (users.Count() > 0)
             {
-                if (item.Username == username && item.Password == Helper.GetPasswordHash(password)) 
-                {
-                    user = item;
-                    break;
-                }
+                Users user = users.First();
+                HttpContext.Session.LoginMe(user);
+                return RedirectToPage("./Index", new { text = $"Wellcome {user.Username}!" });
             }
 
-            Debug.WriteLine($"{username} {password}, '{Helper.GetPasswordHash(password)}'");
-            if (user == null) 
-            { 
-                return RedirectToPage("./Login", new { text = "Wrong Username or Password" });
-            }
-            else
-            {
-                HttpContext.Session.SetString("Username", user.Username);
-            }
-
-            return RedirectToPage("./Index", new { text = $"Wellcome {user.Username}!" });
+            return RedirectToPage("./Login", new { text = "Wrong Username or Password" });
         }
     }
 }
