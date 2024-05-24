@@ -29,31 +29,17 @@ namespace CoinTrading.Pages
 
         public IActionResult OnPost()
         {
-            // TODO: fixa en check i javascript om lösenorden är samma och om det finns något mer som bör kollas
             var username = Request.Form["username"];
             var email = Request.Form["email"];
             var password = Request.Form["password"];
             var confirmPassword = Request.Form["confirmPassword"];
 
-            /*int usernameCount = DB.Users.FromSql($"SELECT * FROM Users WHERE username = '{username}'").Count();
-            Debug.WriteLine($"Användarnamn count: {usernameCount}");
 
-            // TODO: Bör inte skickas till Error
-            if (usernameCount > 0) 
-            {
-                Debug.WriteLine($"Användarnamn upptaget");
-                return RedirectToPage("./Error");
-            }
+            /*IQueryable<Users> emailUsers = from u in DB.Users
+                                      where u.Email == email.ToString()
+                                      select u;
 
-            int emailCount = DB.Users.FromSql($"SELECT * FROM Users WHERE email = {email}").ToList().Count;
-
-            Debug.WriteLine($"Email count: {emailCount}");
-            // TODO: Bör inte skickas till Error
-            if (usernameCount > 0)
-            {
-                Debug.WriteLine($"Email upptaget");
-                return RedirectToPage("./Error");
-            }*/
+            Debug.WriteLine($"Emails: {emailUsers.Count()}");*/
 
             int usernameCount = 0, emailCount = 0;
             foreach (Users u in DB.Users)
