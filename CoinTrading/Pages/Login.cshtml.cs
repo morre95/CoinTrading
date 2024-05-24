@@ -21,9 +21,9 @@ namespace CoinTrading.Pages
         public void OnGet(string? text)
         {
             Message = text;
-            string? username = HttpContext.Session.GetString("Username");
+            string? username = HttpContext.Session.GetUsername();
 
-            if (username != null) ViewData["Username"] = HttpContext.Session.GetString("Username");
+            if (username != null) ViewData["Username"] = username;
         }
 
         public IActionResult OnPost()
