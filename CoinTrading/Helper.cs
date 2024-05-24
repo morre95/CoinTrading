@@ -18,5 +18,17 @@ namespace CoinTrading
                 iterationCount: 100000,
                 numBytesRequested: 256 / 8));
         }
+
+        public static bool IsEmail(string email)
+        {
+            try
+            {
+                return new System.Net.Mail.MailAddress(email).Address == email && !email.Trim().EndsWith('.');
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

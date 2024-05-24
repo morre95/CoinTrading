@@ -6,10 +6,10 @@ namespace CoinTrading.Pages
 {
     public class PricesModel : PageModel
     {
-        UserContext DB;
+        SystemDbContext DB;
         public PricesModel()
         {
-            DB = new UserContext();
+            DB = new SystemDbContext();
         }
 
         public JsonResult OnGet()

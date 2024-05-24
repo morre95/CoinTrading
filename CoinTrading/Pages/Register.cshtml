@@ -15,11 +15,13 @@
         <label for="inputUsername">Email address</label>
         <input type="username" name="username" class="form-control" id="inputUsername" aria-describedby="usernameHelp" placeholder="Enter username" required>
         <small id="usernameHelp" class="form-text text-muted">We'll will allways share your login with all our hackers.</small>
+        <div id="usernameFeedback" class="form-text text-muted" role="alert"></div>
     </div>
     <div class="form-group">
         <label for="inputEmail">Email address</label>
         <input type="email" name="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email" required>
         <small id="emailHelp" class="form-text text-muted">We'll allways share your email with anyone that asks.</small>
+        <div id="emailFeedback" class="form-text text-muted" role="alert"></div>
     </div>
     <div class="form-group">
         <label for="inputPassword">Password</label>
@@ -68,11 +70,31 @@
         }
     }
 
-    
-    username.addEventListener("changed", () => { 
+    function validateUser(url, elementId, errorText) {
+        $.getJSON(url, function (data) {
+            console.log(data)
+            const feedbackElement = document.getElementById(elementId)
+            if (data["exists"]) {
+                feedbackElement.innerText = errorText
+                feedbackElement.classList.add("alert")
+                feedbackElement.classList.add("alert-danger")
+            } else {
+                feedbackElement.innerText = ""
+                feedbackElement.classList.remove("alert")
+                feedbackElement.classList.remove("alert-danger")
+            }
 
+        });
+    }
+
+    
+    username.addEventListener("change", () => { 
+        const url = "Validation/Username/?username=" + encodeURIComponent(username.value)
+        validateUser(url, "usernameFeedback", "Username allready exists")
     });
-    email.addEventListener("changed", () => { 
+    email.addEventListener("change", () => { 
+        const url = "Validation/Email/?email=" + encodeURIComponent(email.value)
+        validateUser(url, "emailFeedback", "Email allready exists")
     });
 
     password.addEventListener("input", CheckPasswordMatching);

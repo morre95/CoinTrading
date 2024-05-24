@@ -2,7 +2,7 @@
 
 namespace CoinTrading.Api
 {
-    public class UserContext : DbContext
+    public class SystemDbContext : DbContext
     {
         public DbSet<Users> Users { get; set; }
         public DbSet<Prices> Prices { get; set; }

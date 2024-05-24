@@ -10,12 +10,12 @@ namespace CoinTrading.Pages
     public class RegisterModel : PageModel
     {
         public string? Message { get; set; }
-        UserContext DB;
+        SystemDbContext DB;
         private readonly ILogger<IndexModel> _logger;
         public RegisterModel(ILogger<IndexModel> logger)
         {
             _logger = logger;
-            DB = new UserContext();
+            DB = new SystemDbContext();
         }
 
         public void OnGet(string? text)
