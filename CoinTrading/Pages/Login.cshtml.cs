@@ -32,6 +32,16 @@ namespace CoinTrading.Pages
             var password = Request.Form["password"];
 
             //var user = DB.Users.FirstOrDefault(user => user.Username == username && user.Password == Helper.GetPasswordHash(password));
+            //var userTest = DB.Users.Select(user => user).Where(user => user.Username == username && user.Password == Helper.GetPasswordHash(password));
+            var userTest = from u in DB.Users
+                           where u.Username == username && u.Password == Helper.GetPasswordHash(password)
+                           select u;
+            Debug.WriteLine("Detta är Debug");
+            Debug.WriteLine(userTest);
+            foreach (var u in userTest)
+            {
+                Debug.WriteLine($"{u.Username}");
+            }
             //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE (username = '{username}' AND password = '{Helper.GetPasswordHash(password)}')").FirstOrDefault();
             //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE password = {Helper.GetPasswordHash(password)}").FirstOrDefault();
             //var user = DB.Users.FromSql($"SELECT * FROM Users WHERE username = {username} AND password = {Helper.GetPasswordHash(password)}").First();
@@ -46,7 +56,7 @@ namespace CoinTrading.Pages
                 }
             }
 
-            Debug.WriteLine($"{username} {password}, '{Helper.GetPasswordHash(password)}'");
+            //Debug.WriteLine($"{username} {password}, '{Helper.GetPasswordHash(password)}'");
             if (user == null) 
             { 
                 return RedirectToPage("./Login", new { text = "Wrong Username or Password" });

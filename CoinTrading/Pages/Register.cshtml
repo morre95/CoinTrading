@@ -38,6 +38,8 @@
 </form>
 
 <script>
+    const username = document.getElementById("inputUsername")
+    const email = document.getElementById("inputEmail")
     const password = document.getElementById("inputPassword")
     const confirmPassword = document.getElementById("inputConfirmPassword")
     const feedback = document.getElementById("confirmPassword-feedback")
@@ -65,6 +67,13 @@
             })
         }
     }
+
+    
+    username.addEventListener("changed", () => { 
+
+    });
+    email.addEventListener("changed", () => { 
+    });
 
     password.addEventListener("input", CheckPasswordMatching);
     confirmPassword.addEventListener("input", CheckPasswordMatching);
