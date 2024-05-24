@@ -33,7 +33,7 @@ namespace CoinTrading.Pages
             var username = Request.Form["username"];
             var email = Request.Form["email"];
             var password = Request.Form["password"];
-            var passwordAgain = Request.Form["passwordAgain"];
+            var confirmPassword = Request.Form["confirmPassword"];
 
             /*int usernameCount = DB.Users.FromSql($"SELECT * FROM Users WHERE username = '{username}'").Count();
             Debug.WriteLine($"Användarnamn count: {usernameCount}");
@@ -79,7 +79,7 @@ namespace CoinTrading.Pages
                 return RedirectToPage("./Register", new { text = "Email occupied" });
             }
 
-            if (password != passwordAgain || password == "")
+            if (password != confirmPassword || password == "")
             {
                 return RedirectToPage("./Register", new { text = "Passwords do not match" });
             }
