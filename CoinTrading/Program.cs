@@ -19,6 +19,15 @@ namespace CoinTrading
                 options.Cookie.IsEssential = true;
             });
 
+            builder.Services.AddRazorPages(options =>
+            {
+                options.Conventions.AddPageRoute("/RegisterError", "Register/{text?}");
+                options.Conventions.AddPageRoute("/LoginError", "Login/{text?}");
+
+                options.Conventions.AddPageRoute("/Logedin", "Index/{text?}");
+
+            });
+
 
             var app = builder.Build();
 

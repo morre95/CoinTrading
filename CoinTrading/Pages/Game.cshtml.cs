@@ -7,6 +7,9 @@ namespace CoinTrading.Pages
     {
         public void OnGet()
         {
+            string? username = HttpContext.Session.GetString("Username");
+
+            if (username != null) ViewData["Username"] = HttpContext.Session.GetString("Username");
         }
     }
 }

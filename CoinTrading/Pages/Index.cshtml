@@ -1,7 +1,14 @@
-﻿@page
+﻿@page "{text?}"
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+}
+
+@if (Model.Message != null)
+{
+    <div class="alert alert-primary" role="alert">
+        @Model.Message
+    </div>
 }
 
 <div class="text-center">

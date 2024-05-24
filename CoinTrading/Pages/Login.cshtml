@@ -1,7 +1,15 @@
-﻿@page
+﻿@page "{text?}"
 @model CoinTrading.Pages.LoginModel
 @{
     ViewData["Title"] = "Login";
+}
+
+
+@if (Model.Message != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @Model.Message
+    </div>
 }
 
 <form method="POST">

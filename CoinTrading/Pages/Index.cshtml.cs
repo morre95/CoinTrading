@@ -8,6 +8,7 @@ namespace CoinTrading.Pages
 {
     public class IndexModel : PageModel
     {
+        public string? Message { get; set; }
         private readonly ILogger<IndexModel> _logger;
 
         public IndexModel(ILogger<IndexModel> logger)
@@ -15,9 +16,13 @@ namespace CoinTrading.Pages
             _logger = logger;
         }
 
-        public void OnGet()
+        public void OnGet(string? text)
         {
-            Debug.WriteLine($"'{Helper.GetPasswordHash("1234")}'");
+            Message = text;
+
+            string? username = HttpContext.Session.GetString("Username");
+
+            if (username != null) ViewData["Username"] = HttpContext.Session.GetString("Username");
         }
     }
 

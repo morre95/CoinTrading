@@ -9,23 +9,21 @@ namespace CoinTrading.Pages
 {
     public class LoginModel : PageModel
     {
+        public string? Message { get; set; }
         UserContext DB;
-        public LoginModel()
+        private readonly ILogger<IndexModel> _logger;
+        public LoginModel(ILogger<IndexModel> logger)
         {
+            _logger = logger;
             DB = new UserContext();
         }
 
-        public void OnGet()
+        public void OnGet(string? text)
         {
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
-            {
-                Debug.WriteLine("Inte inloggad");
-            }
-            else 
-            {
-                Debug.WriteLine($"Username: {username} är inloggad");
-            }
+            Message = text;
+            string? username = HttpContext.Session.GetString("Username");
+
+            if (username != null) ViewData["Username"] = HttpContext.Session.GetString("Username");
         }
 
         public IActionResult OnPost()
@@ -51,14 +49,14 @@ namespace CoinTrading.Pages
             Debug.WriteLine($"{username} {password}, '{Helper.GetPasswordHash(password)}'");
             if (user == null) 
             { 
-                return RedirectToPage("./Error");
+                return RedirectToPage("./Login", new { text = "Wrong Username or Password" });
             }
             else
             {
                 HttpContext.Session.SetString("Username", user.Username);
             }
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("./Index", new { text = $"Wellcome {user.Username}!" });
         }
     }
 }

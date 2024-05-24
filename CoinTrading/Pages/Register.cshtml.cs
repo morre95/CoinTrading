@@ -9,14 +9,22 @@ namespace CoinTrading.Pages
 {
     public class RegisterModel : PageModel
     {
+        public string? Message { get; set; }
         UserContext DB;
-        public RegisterModel()
+        private readonly ILogger<IndexModel> _logger;
+        public RegisterModel(ILogger<IndexModel> logger)
         {
+            _logger = logger;
             DB = new UserContext();
         }
 
-        public void OnGet()
+        public void OnGet(string? text)
         {
+            Message = text;
+
+            string? username = HttpContext.Session.GetString("Username");
+
+            if (username != null) ViewData["Username"] = HttpContext.Session.GetString("Username");
         }
 
         public IActionResult OnPost()
@@ -61,24 +69,19 @@ namespace CoinTrading.Pages
                 }
             }
 
-            // TODO: Bör inte skickas till Error
             if (usernameCount > 0)
             {
-                Debug.WriteLine($"Användarnamn upptaget");
-                return RedirectToPage("./Error");
+                return RedirectToPage("./Register", new { text = "Username occupied" });
             }
 
-            // TODO: Bör inte skickas till Error
-            if (usernameCount > 0)
+            if (emailCount > 0)
             {
-                Debug.WriteLine($"Email upptaget");
-                return RedirectToPage("./Error");
+                return RedirectToPage("./Register", new { text = "Email occupied" });
             }
 
-            if (password != passwordAgain)
+            if (password != passwordAgain || password == "")
             {
-                Debug.WriteLine($"Lösenorden stämmer inte");
-                return RedirectToPage("./Error");
+                return RedirectToPage("./Register", new { text = "Passwords do not match" });
             }
 
             Users user = new();
