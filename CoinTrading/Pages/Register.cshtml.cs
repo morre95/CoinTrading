@@ -18,13 +18,16 @@ namespace CoinTrading.Pages
             DB = new SystemDbContext();
         }
 
-        public void OnGet(string? text)
+        public IActionResult OnGet(string? text)
         {
             Message = text;
 
-            string? username = HttpContext.Session.GetUsername();
+            if (HttpContext.Session.IsLogedin())
+            {
+                return RedirectToPage("./Index");
+            }
 
-            if (username != null) ViewData["Username"] = username;
+            return Page();
         }
 
         public IActionResult OnPost()

@@ -21,6 +21,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS users (
              password TEXT,
              email TEXT, 
              token TEXT,
+             balance REAL,
              timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 conn.commit()
 

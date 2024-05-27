@@ -22,23 +22,26 @@ namespace CoinTrading.Pages
 
         public IActionResult OnGet(string? text)
         {
-            Debug.WriteLine(HttpContext.Session.IsLogedin());
-            Debug.WriteLine(CheckCookieLoggedin());
             if (HttpContext.Session.IsLogedin() || CheckCookieLoggedin()) 
             {
                 return RedirectToPage("./Index", new { text = $"Wellcome {HttpContext.Session.GetUsername()}" });
             }
- 
 
             Message = text;
-            string? username = HttpContext.Session.GetUsername();
 
-            if (username != null) ViewData["Username"] = username;
+            string? username = HttpContext.Session.GetUsername();
+            double balance = HttpContext.Session.GetBalance();
+
+            if (username != null)
+            {
+                ViewData["Username"] = username;
+                ViewData["Balance"] = balance;
+            }
 
             return Page();
         }
 
-        public IActionResult OnPost()
+        public IActionResult OnPostAsync()
         {
             var username = Request.Form["username"];
             var password = Request.Form["password"];
@@ -80,12 +83,6 @@ namespace CoinTrading.Pages
             if (HttpContext.Session.IsLogedin()) return true;
 
             string? expires = HttpContext.Request.Cookies["expires"];
-
-            /*DateTimeOffset.TryParse(expires, out DateTimeOffset exDate2);
-            Debug.WriteLine(expires);
-            Debug.WriteLine(exDate2.ToString());
-            Debug.WriteLine(DateTimeOffset.Now.ToString());
-            Debug.WriteLine(exDate2 >= DateTimeOffset.Now);*/
 
             if (expires != null && DateTimeOffset.TryParse(expires, out DateTimeOffset exDate) && exDate >= DateTimeOffset.Now)
             {
