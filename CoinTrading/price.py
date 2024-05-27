@@ -22,6 +22,9 @@ c.execute('''CREATE TABLE IF NOT EXISTS prices
               timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 conn.commit()
 
+c.execute('DELETE FROM prices')
+conn.commit()
+
 async def get_binance_price(symbol):
     uri = f"wss://stream.binance.com:9443/ws/{symbol.lower()}@miniTicker"
 
@@ -38,6 +41,9 @@ async def get_binance_price(symbol):
             # Spara priserna i databasen
             c.execute("INSERT INTO prices (symbol, open_price, close_price, high_price, low_price) VALUES (?, ?, ?, ?, ?)", 
                       (symbol.upper(), open_price, close_price, high_price, low_price))
+            conn.commit()
+
+            c.execute("DELETE FROM prices WHERE timestamp < DATETIME('now', '-400 seconds')")
             conn.commit()
 
             await asyncio.sleep(1)
