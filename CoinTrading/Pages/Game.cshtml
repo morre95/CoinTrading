@@ -70,6 +70,7 @@
 
 @section Scripts {
     <script>
+
         document.addEventListener("DOMContentLoaded", function () {
             const canvas = document.getElementById('lineChart');
             const ctx = canvas.getContext('2d');
@@ -78,15 +79,31 @@
             const height = canvas.height;
             const graphWidth = width;
             const graphHeight = height;
-
+            let lastMouseY = 0;
             let labels = [];
             let data = [];
 
             const maxDataPoints = 300; // Assuming 1 data point per second for 5 minutes
 
+            canvas.addEventListener('mousemove', (event) => {
+                // Get mouse position relative to the canvas
+                const rect = canvas.getBoundingClientRect();
+                const mouseY = event.clientY - rect.top;
+                lastMouseY = mouseY;
+                // Redraw the graph and the horizontal line
+                updateChart();
+            });
+            function drawHorizontalLine() {
+                ctx.beginPath();
+                ctx.moveTo(0, lastMouseY);
+                ctx.lineTo(canvas.width, lastMouseY);
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
+            }
+
             const fetchCoinData = async () => {
                 try {
-                    const response = await fetch('https://localhost:7006/latestprice'); 
+                    const response = await fetch('@Url.Page("latestprice")');
                     const result = await response.json();
                     currentPrice = result.price.close_price;
                     const timestamp = new Date().toLocaleTimeString();
@@ -166,6 +183,9 @@
                         ctx.fillText(label, x, y);
                     }
                 });
+
+                //draw mouse line
+                drawHorizontalLine();
             };
 
             // Fetch new data every second
