@@ -50,25 +50,26 @@
         <div class="trade-form">
             <div class="form-group">
                 <label for="marketType">Order Type</label>
-                <select id="marketType" class="form-control">
+                    <select id="marketType" name="marketType" class="form-control">
                     <option value="market">Market</option>
                     <option value="limit">Limit</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="leverage">Leverage</label>
-                <input type="text" id="leverage" class="form-control" placeholder="Leverage">
+                <input type="text" id="leverage" name="leverage" class="form-control" placeholder="Leverage">
             </div>
             <div class="form-group">
                 <label for="price">Price</label>
-                <input type="text" id="price" class="form-control" placeholder="Price">
+                <input type="text" id="price" name="price" class="form-control" placeholder="Price">
             </div>
             <div class="form-group">
                 <label for="amount">Amount</label>
-                <input type="text" id="amount" class="form-control" placeholder="Amount">
+                <input type="text" id="amount" name="amount" class="form-control" placeholder="Amount">
+                <small id="orderValue"></small>
             </div>
             <div class="buysell-buttons">
-                <button class="btn btn-primary">Buy</button>
+                <button class="btn btn-primary" id="buyBtn">Buy</button>
                 <button class="btn btn-danger">Sell</button>
             </div>
         </div>
@@ -111,10 +112,15 @@
 
 
                 // Eriks Ändringar
-                document.getElementById('myHoverPrice').style.top = `${event.clientY + rect.top - 15}px`
+                document.getElementById('myHoverPrice').style.top = `${event.clientY - 20}px`
                 document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
                 document.getElementById('myHoverPrice').innerText = myPrice
                 // Slut på Eriks ändringar
+            });
+
+            // Erik la till en klick funktion också
+            canvas.addEventListener('click', () => {
+                document.getElementById('price').value = myPrice
             });
 
             function drawHorizontalLine() {
@@ -128,7 +134,7 @@
                 ctx.font = '21px Arial';
                 ctx.fillStyle = 'white';
                 let mousePrice = maxValue-(maxValue-minValue)*(lastMouseY/(height*1.5))-(maxValue-minValue)*0.3
-                ctx.fillText(Number(mousePrice).toFixed(2)+" (fel)", width, lastMouseY);
+                //ctx.fillText(Number(mousePrice).toFixed(2)+" (fel)", width, lastMouseY);
 
 
 
@@ -227,5 +233,44 @@
             // Fetch new data every second
             setInterval(fetchCoinData, 1000);
         });
+
+
+
+
+        const amount = document.getElementById('amount')
+        const price = document.getElementById('price')
+        const leverage = document.getElementById('leverage')
+        const orderValue = document.getElementById('orderValue')
+
+        document.getElementById('buyBtn').addEventListener('click', () => {
+
+            const formData = new FormData();
+            formData.append('amount', amount.value)
+            formData.append('price', price.value)
+            formData.append('leverage', leverage.value)
+            formData.append('side', 'buy')
+            formData.append('type', 'market')
+            const url = '@Url.Page("./Game")'
+
+            const options = {
+                method: 'POST',
+                body: formData
+            }
+
+            // send POST request
+            fetch(url, options)
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(err => {
+                    console.error('Error: ', err)
+                })
+            
+            /*$.post('./Game', { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' })
+                .done(function (data) {
+                    console.log("Data Loaded: " + data);
+                    orderValue.innerHTML = `Order value: ${data.orderValue}`
+                });*/
+        })
+        
     </script>
 }
