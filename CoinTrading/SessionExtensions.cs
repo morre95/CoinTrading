@@ -20,7 +20,7 @@ namespace CoinTrading
             session.Set(key, BitConverter.GetBytes(value));
         }
 
-        public static bool? IsLogedin(this ISession session) => session.GetBool("logedin");
+        public static bool IsLogedin(this ISession session) => session.GetBool("logedin") == true;
         public static string? GetUsername(this ISession session) => session.GetString("Username");
         public static string? GetEmail(this ISession session) => session.GetString("Email");
 
@@ -29,6 +29,20 @@ namespace CoinTrading
             session.SetString("Username", user.Username);
             session.SetString("Email", user.Email);
             session.SetBool("logedin", true);
+        }
+
+        public static void LogoutMe(this ISession session)
+        {
+            SystemDbContext db = new();
+            Users? user = db.Users.Where(u => u.Username == session.GetUsername()).ToList().FirstOrDefault();
+
+            if (user != null)
+            {
+                user.Token = "";
+                db.SaveChanges();
+            }
+
+            session.Clear();
         }
     }
 }
