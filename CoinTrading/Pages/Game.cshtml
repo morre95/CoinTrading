@@ -38,6 +38,15 @@
         <h1 id="priceText" class="display-4">Live Coin Price</h1>
         <canvas id="lineChart" width="800" height="500" style="border:1px solid #000; background-color: #0D2738;"></canvas>
 
+        <!-- Eriks ändringar -->
+        <style>
+            #myHoverPrice {
+                position: absolute;
+            }
+        </style>
+        <div id="myHoverPrice"></div>
+        <!-- slut på Eriks ändringar -->
+
         <div class="trade-form">
             <div class="form-group">
                 <label for="marketType">Order Type</label>
@@ -85,6 +94,10 @@
             let maxValue = 1;
             let minValue = 0;
 
+            // Eriks ändringar
+            let myPrice = 0;
+            // Slut på Eriks ändringar
+
             const maxDataPoints = 300; // Assuming 1 data point per second for 5 minutes
 
             canvas.addEventListener('mousemove', (event) => {
@@ -94,7 +107,16 @@
                 lastMouseY = mouseY;
                 // Redraw the graph and the horizontal line
                 updateChart();
+
+
+
+                // Eriks Ändringar
+                document.getElementById('myHoverPrice').style.top = `${event.clientY + rect.top - 15}px`
+                document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
+                document.getElementById('myHoverPrice').innerText = myPrice
+                // Slut på Eriks ändringar
             });
+
             function drawHorizontalLine() {
                 ctx.beginPath();
                 ctx.moveTo(0, lastMouseY);
@@ -107,6 +129,12 @@
                 ctx.fillStyle = 'white';
                 let mousePrice = maxValue-(maxValue-minValue)*(lastMouseY/(height*1.5))-(maxValue-minValue)*0.3
                 ctx.fillText(Number(mousePrice).toFixed(2)+" (fel)", width, lastMouseY);
+
+
+
+                // Eriks ändringar
+                myPrice = Number(mousePrice).toFixed(2)
+                // Slut på Eriks ändringar
             }
 
             const fetchCoinData = async () => {
