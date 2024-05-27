@@ -111,12 +111,16 @@
 
 
                 // Eriks Ändringar
-                const rect2 = canvas.getBoundingClientRect();
-                document.getElementById('myHoverPrice').style.top = `${lastMouseY + rect2.top - 15}px`
-                document.getElementById('myHoverPrice').style.left = `${rect2.left + rect2.width + 4}px`
+                document.getElementById('myHoverPrice').style.top = `${event.clientY + rect.top - 15}px`
+                document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
                 document.getElementById('myHoverPrice').innerText = myPrice
                 // Slut på Eriks ändringar
             });
+
+            canvas.addEventListener('click', (event) => {
+                document.getElementById('price').value = myPrice
+            })
+
             function drawHorizontalLine() {
                 ctx.beginPath();
                 ctx.moveTo(0, lastMouseY);
