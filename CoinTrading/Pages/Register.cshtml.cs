@@ -77,7 +77,8 @@ namespace CoinTrading.Pages
 
             user.Username = username;
             user.Email = email;
-            user.Password = Helper.GetPasswordHash(password);
+            user.Password = Helper.GetPasswordHash(password.ToString());
+            user.Balance = 10_000.0;
 
             DB.Add(user);
             DB.SaveChanges();
