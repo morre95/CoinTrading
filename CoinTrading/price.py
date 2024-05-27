@@ -11,6 +11,10 @@ print(db_path)
 conn = sqlite3.connect(db_path)
 c = conn.cursor()
 
+
+c.execute('DROP TABLE prices')
+conn.commit()
+
 # Skapa en tabell om den inte redan finns
 c.execute('''CREATE TABLE IF NOT EXISTS prices
              (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,9 +24,6 @@ c.execute('''CREATE TABLE IF NOT EXISTS prices
               high_price REAL, 
               low_price REAL, 
               timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
-conn.commit()
-
-c.execute('DELETE FROM prices')
 conn.commit()
 
 async def get_binance_price(symbol):
