@@ -54,33 +54,40 @@
         </style>
         <div id="myHoverPrice"></div>
         <!-- slut på Eriks ändringar -->
-
-        <div class="trade-form">
-            <div class="form-group">
-                <label for="marketType">Order Type</label>
+        @if (Model.IsLoegin)
+        {
+            <div class="trade-form">
+                <div class="form-group">
+                    <label for="marketType">Order Type</label>
                     <select id="marketType" name="marketType" class="form-control">
-                    <option value="market">Market</option>
-                    <option value="limit">Limit</option>
-                </select>
+                        <option value="market">Market</option>
+                        <option value="limit">Limit</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="leverage">Leverage</label>
+                    <input type="text" id="leverage" name="leverage" class="form-control" placeholder="Leverage">
+                </div>
+                <div class="form-group">
+                    <label for="price">Price</label>
+                    <input type="text" id="price" name="price" class="form-control" placeholder="Price">
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount</label>
+                    <input type="text" id="amount" name="amount" class="form-control" placeholder="Amount">
+                    <small id="orderValue"></small>
+                </div>
+                <div class="buysell-buttons">
+                    <button class="btn btn-primary" id="buyBtn">Buy</button>
+                    <button class="btn btn-danger">Sell</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="leverage">Leverage</label>
-                <input type="text" id="leverage" name="leverage" class="form-control" placeholder="Leverage">
-            </div>
-            <div class="form-group">
-                <label for="price">Price</label>
-                <input type="text" id="price" name="price" class="form-control" placeholder="Price">
-            </div>
-            <div class="form-group">
-                <label for="amount">Amount</label>
-                <input type="text" id="amount" name="amount" class="form-control" placeholder="Amount">
-                <small id="orderValue"></small>
-            </div>
-            <div class="buysell-buttons">
-                <button class="btn btn-primary" id="buyBtn">Buy</button>
-                <button class="btn btn-danger">Sell</button>
-            </div>
-        </div>
+        }
+        else
+        {
+            <div><a href="./Login">Login</a></div>
+        }
+
     </div>
 
 </body>
@@ -250,19 +257,41 @@
         const leverage = document.getElementById('leverage')
         const orderValue = document.getElementById('orderValue')
 
-        document.getElementById('buyBtn').addEventListener('click', () => {
+        function urlBuilder(base, parmas) {
+            let buildUrl = function (base, key, value) {
+                let sep = (base.indexOf('?') > -1) ? '&' : '?';
+                return base + sep + key + '=' + value;
+            }
+            for (var property in parmas) {
+                if (parmas.hasOwnProperty(property)) {
+                    base = buildUrl(base, property, parmas[property]);
+                }
+            }
 
-            const formData = new FormData();
+            return base;
+        }
+
+        document.getElementById('buyBtn').addEventListener('click', (e) => {
+
+            e.preventDefault();
+
+            $.getJSON(urlBuilder("Position/OpenPosition", { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' }), function (data) {
+                console.log(data)
+            });
+
+            
+            /*const formData = new FormData();
             formData.append('amount', amount.value)
             formData.append('price', price.value)
             formData.append('leverage', leverage.value)
             formData.append('side', 'buy')
             formData.append('type', 'market')
-            const url = '@Url.Page("./Game")'
+            const url = 'Position/OpenPosition'
+
+            console.log(formData);
 
             const options = {
-                method: 'POST',
-                body: formData
+                method: 'get'
             }
 
             // send POST request
@@ -271,7 +300,7 @@
                 .then(res => console.log(res))
                 .catch(err => {
                     console.error('Error: ', err)
-                })
+                })*/
             
             /*$.post('./Game', { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' })
                 .done(function (data) {
