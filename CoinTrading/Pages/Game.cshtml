@@ -261,6 +261,8 @@
 
             e.preventDefault();
 
+            console.log(urlBuilder("Position/OpenPosition", { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' }))
+
             $.getJSON(urlBuilder("Position/OpenPosition", { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' }), function (data) {
                 console.log(data)
             });
