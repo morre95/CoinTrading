@@ -32,14 +32,14 @@ def add_user(username, password, email):
 # Lägg till en ny användare varje sekund
 try:
     pass
-    #while True:
+   # while True:
         #timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        #username = f"user_{timestamp}"
-        #password = "password123"  # Du kan generera eller få ett lösenord på ett mer dynamiskt sätt
-        #email = f"{username}@example.com"
-        #add_user(username, password, email)
-        #print(f"Lagt till användare: {username}")
-        #time.sleep(2)
+       # username = f"user_{timestamp}"
+       # password = "password123"  # Du kan generera eller få ett lösenord på ett mer dynamiskt sätt
+       # email = f"{username}@example.com"
+       # add_user(username, password, email)
+       # print(f"Lagt till användare: {username}")
+       # time.sleep(2)
 except KeyboardInterrupt:
     pass
 finally:
