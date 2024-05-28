@@ -13,9 +13,13 @@
     <style>
         .trade-form {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
             margin-top: 20px;
+            padding-block-start:100px;
+            padding-block-end: 100px;
+            
+           
         }
 
             .trade-form .form-group {
@@ -23,20 +27,24 @@
                 flex: 1;
             }
 
+
+                .trade-form .form-group input,
+                .trade-form .form-group select {
+                    width: 100%; /* Modifierad till 100% för att ta upp hela bredden av .form-group */
+                    margin: auto;
+                }
+
             .trade-form .buysell-buttons {
                 display: flex;
+                align-items: flex-end;
+               
             }
-
-                .trade-form .buysell-buttons .btn {
-                    margin: 0 5px;
-                    flex: 1;
-                }
     </style>
 </head>
 <body>
     <div class="text-center">
         <h1 id="priceText" class="display-4">Live Coin Price</h1>
-        <canvas id="lineChart" width="800" height="500" style="border:1px solid #000; background-color: #0D2738;"></canvas>
+        <canvas id="lineChart" width="1200" height="800" style="border:1px solid #000; background-color: #0D2738;"></canvas>
 
         <!-- Eriks ändringar -->
         <style>
