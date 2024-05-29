@@ -40,14 +40,32 @@
         background-color: #686968;
         color: white;
     }
+
+    .stats {
+        display: flex;
+        justify-content: space-around;
+       
+        margin-bottom: 20px;
+        color: white;
+        font-size: 1.2em;
+    }
 </style>
 <div class="text-center">
     <h1 id="priceText" class="display-4">Live Coin Price</h1>
-    <canvas id="lineChart" width="1200" height="800" style="border:1px solid #000; background-color: #0D2738;"></canvas>
+   
 
     <!-- Eriks ändringar -->
     <div id="myHoverPrice"></div>
     <!-- slut på Eriks ändringar -->
+    <!--amirs ändringar-->
+    <div class="stats">
+        <div id="balance">Balance: $0.00</div>
+        <div id="entryPrice">Average Entry Price: $0.00</div>
+        <div id="orderValue">Order Value: $0.00</div>
+        <div id="pl">P&L: $0.00</div>
+    </div>
+    <!--slut på amirs ändringar-->
+    <canvas id="lineChart" width="1200" height="800" style="border:1px solid #000; background-color: #0D2738;"></canvas>
     @if (Model.IsLoegin)
     {
         <div class="trade-form">
@@ -262,7 +280,6 @@
                     price.disabled = false
                 }
                 };
-
             // Fetch new data every second
             setInterval(fetchCoinData, 1000);
         });
