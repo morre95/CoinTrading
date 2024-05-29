@@ -11,6 +11,9 @@ namespace CoinTrading.Pages
         private readonly ILogger<ProfileModel> _logger;
 
 
+        public string? Username { get; set; }
+        public double Balance { get; set; }
+
         public ProfileModel(ILogger<ProfileModel> logger)
         {
             _logger = logger;
@@ -18,14 +21,14 @@ namespace CoinTrading.Pages
 
         public void OnGet()
         {
-            string? username = HttpContext.Session.GetUsername();
-            double balance = HttpContext.Session.GetBalance();
+            Username = HttpContext.Session.GetUsername();
+            Balance = HttpContext.Session.GetBalance();
 
 
-            if (username != null)
+            if (Username != null)
             {
-                ViewData["Username"] = username;
-                ViewData["Balance"] = balance;
+                ViewData["Username"] = Username;
+                ViewData["Balance"] = Balance;
             }
         }
 
