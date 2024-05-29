@@ -34,6 +34,13 @@ namespace CoinTrading.Pages
         {
             Username = HttpContext.Session.GetUsername();
             Balance = HttpContext.Session.GetBalance();
+
+
+            if (Username != null)
+            {
+                ViewData["Username"] = Username;
+                ViewData["Balance"] = Balance;
+            }
         }
 
         public IActionResult OnPost()
