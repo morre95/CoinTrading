@@ -57,7 +57,7 @@ namespace CoinTrading.Pages
             var password = Request.Form["password"];
             var confirmPassword = Request.Form["confirmPassword"];
 
-            int id = 1; // TODO: fixa id i session
+            int id = HttpContext.Session.GetUserId();
 
             SystemDbContext db = new SystemDbContext();
             Users? user = db.Users.FirstOrDefault(x => x.Id == id);
