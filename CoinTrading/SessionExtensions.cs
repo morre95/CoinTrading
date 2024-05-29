@@ -33,6 +33,17 @@ namespace CoinTrading
             return isDouble ? balnace : 0.0;
         }
 
+        public static void SetUserId(this ISession session, int id)
+        {
+            session.SetString("userId", id.ToString());
+        }
+
+        public static int GetUserId(this ISession session)
+        {
+            bool isId = int.TryParse(session.GetString("userId") ?? "", out int id);
+            return isId ? id : -1;
+        }
+
         public static bool IsLogedin(this ISession session) => session.GetBool("logedin") == true;
         public static string? GetUsername(this ISession session) => session.GetString("Username");
         public static string? GetEmail(this ISession session) => session.GetString("Email");
@@ -42,6 +53,7 @@ namespace CoinTrading
             session.SetString("Username", user.Username ?? "no Username");
             session.SetString("Email", user.Email ?? "no Email");
             session.SetBalance(user.Balance);
+            session.SetUserId(user.Id);
             session.SetBool("logedin", true);
         }
 
