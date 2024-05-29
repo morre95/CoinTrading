@@ -87,7 +87,7 @@
 @section Scripts {
     <script>
 
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () { // detta event kan städas bort
             const canvas = document.getElementById('lineChart');
             const ctx = canvas.getContext('2d');
 
@@ -100,7 +100,7 @@
             let labels = [];
             let data = [];
 
-            let graphGapY = 0.3;
+            let zoomOutAxisY = 0.2;
             let graphMinY = 0;
             let graphMaxY = 1;
 
@@ -109,6 +109,14 @@
             // Slut på Eriks ändringar
 
             const maxDataPoints = 300; // Assuming 1 data point per second for 5 minutes
+
+            canvas.addEventListener('wheel', (event) => {
+                event.preventDefault(); 
+                let maxZoom = 0.1;
+                zoomOutAxisY += event.deltaY*0.1;
+                if (zoomOutAxisY < maxZoom) zoomOutAxisY = maxZoom;
+                updateChart();
+            });
 
             canvas.addEventListener('mousemove', (event) => {
                 // Get mouse position relative to the canvas
@@ -157,7 +165,9 @@
                 let maxValue = Math.max(...data);
                 let minValue = Math.min(...data);
                 let priceRange = maxValue-minValue;
-                let graphExtend = priceRange*graphGapY;
+                let graphExtend = priceRange*Math.pow(zoomOutAxisY, 1/2);
+                let minStretchFactor =minValue*0.001; // set to 1% here 
+                if (graphExtend < minStretchFactor)graphExtend = minStretchFactor
                 graphMinY = minValue-graphExtend;
                 graphMaxY = maxValue+graphExtend;
             }
@@ -241,8 +251,17 @@
                 });
 
                 //draw mouse line
-                drawHorizontalLine();
-            };
+                  drawHorizontalLine();
+
+                 if (document.getElementById('marketType').value === "market") {
+                    price.disabled = true
+                    document.getElementById('price').value = currentPrice;
+                    // TODO: uppdatera document.getElementById('price').value till det aktuella priset varje gång grafen uppdateras
+                } else {
+                    // TODO: Stäng av auto uppdatringen av priset
+                    price.disabled = false
+                }
+                };
 
             // Fetch new data every second
             setInterval(fetchCoinData, 1000);
@@ -285,13 +304,7 @@
 
         marketType.addEventListener('change', (event) => {
             console.log(event.target.value)
-            if (event.target.value === "market") {
-                price.disabled = true
-                // TODO: uppdatera document.getElementById('price').value till det aktuella priset varje gång grafen uppdateras
-            } else {
-                // TODO: Stäng av auto uppdatringen av priset
-                price.disabled = false
-            }
+
         })
         
     </script>
