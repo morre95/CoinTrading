@@ -10,8 +10,7 @@
         align-items: flex-end;
         justify-content: center;
         margin-top: 20px;
-        padding-block-start: 100px;
-        padding-block-end: 100px;
+
     }
 
     .trade-form .form-group {
@@ -24,6 +23,8 @@
     .trade-form .form-group select {
         width: 100%; /* Modifierad till 100% för att ta upp hela bredden av .form-group */
         margin: auto;
+                background-color: #686968;
+                color: white;
     }
 
     .trade-form .buysell-buttons {
@@ -33,6 +34,11 @@
 
     #myHoverPrice {
         position: absolute;
+    }
+
+    input[type="text"], textarea, select {
+        background-color: #686968;
+        color: white;
     }
 </style>
 <div class="text-center">
@@ -85,6 +91,8 @@
             const canvas = document.getElementById('lineChart');
             const ctx = canvas.getContext('2d');
 
+
+
             const width = canvas.width;
             const height = canvas.height;
             const graphWidth = width;
@@ -93,8 +101,12 @@
             let currentPrice = 0;
             let labels = [];
             let data = [];
-            let maxValue = 1;
-            let minValue = 0;
+
+            let graphGapY = 0.3;
+            let graphMinY = 0;
+            let graphMaxY = 1;
+
+
 
             // Eriks ändringar
             let myPrice = 0;
@@ -105,18 +117,10 @@
             canvas.addEventListener('mousemove', (event) => {
                 // Get mouse position relative to the canvas
                 const rect = canvas.getBoundingClientRect();
-                const mouseY = event.clientY - rect.top;
-                lastMouseY = mouseY;
-                // Redraw the graph and the horizontal line
-                updateChart();
-
-
-
-                // Eriks Ändringar
+                lastMouseY = event.clientY - rect.top;
                 document.getElementById('myHoverPrice').style.top = `${event.clientY - 20}px`
                 document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
-                document.getElementById('myHoverPrice').innerText = myPrice
-                // Slut på Eriks ändringar
+                updateChart();
             });
 
             // Erik la till en klick funktion också
@@ -134,14 +138,32 @@
                 ctx.textAlign = 'right';
                 ctx.font = '21px Arial';
                 ctx.fillStyle = 'white';
-                let mousePrice = maxValue-(maxValue-minValue)*(lastMouseY/(height*1.5))-(maxValue-minValue)*0.3
-                //ctx.fillText(Number(mousePrice).toFixed(2)+" (fel)", width, lastMouseY);
-
-
-
-                // Eriks ändringar
+                let mousePrice = getPriceFromPixelY(lastMouseY);
                 myPrice = Number(mousePrice).toFixed(2)
-                // Slut på Eriks ändringar
+
+
+                document.getElementById('myHoverPrice').innerText = myPrice
+            }
+
+            function getPriceFromPixelY(pixelY) {
+                var graphRange = graphMaxY-graphMinY;
+                var ratio = 1-pixelY/height
+                return ratio*graphRange+graphMinY;
+            }
+
+            function getPixelFromPrice(price) {
+                var graphRange = graphMaxY-graphMinY;
+                var ratio = (price-graphMinY)/graphRange;
+                return  height - ratio*height;
+            }
+
+            function updateGraphYRange() {
+                let maxValue = Math.max(...data);
+                let minValue = Math.min(...data);
+                let priceRange = maxValue-minValue;
+                let graphExtend = priceRange*graphGapY;
+                graphMinY = minValue-graphExtend;
+                graphMaxY = maxValue+graphExtend;
             }
 
             const fetchCoinData = async () => {
@@ -169,6 +191,7 @@
 
             const updateChart = () => {
                 // Clear canvas
+                updateGraphYRange();
                 ctx.clearRect(0, 0, width, height);
 
                 // Draw the X and Y axis
@@ -179,13 +202,6 @@
                 ctx.stroke();
                 
 
-                // Calculate the max value to scale the graph
-                maxValue = Math.max(...data);
-                minValue = Math.min(...data);
-
-                const shiftY = minValue - (maxValue - minValue) * 0.3;
-                const scaleY = graphHeight / ((maxValue - minValue)*1.5);
-
                 // Create the gradient for the fill
                 const gradient = ctx.createLinearGradient(0, 0, 0, height);
                 gradient.addColorStop(0, 'rgba(25, 98, 139, 0.7)');
@@ -193,10 +209,10 @@
 
                 // Draw the data points and lines with gradient fill
                 ctx.beginPath();
-                ctx.moveTo(0, height - (data[0]-shiftY) * scaleY);
+                ctx.moveTo(0, getPixelFromPrice(data[0]) );
                 data.forEach((value, index) => {
                     const x = (graphWidth / (labels.length - 1)) * index;
-                    const y = height - (value-shiftY) * scaleY;
+                    const y = getPixelFromPrice(value);
                     ctx.lineTo(x, y);
                 });
                 ctx.lineTo(width, height);
@@ -205,16 +221,19 @@
                 ctx.fillStyle = gradient;
                 ctx.fill();
 
+                
                 // Draw the line on top of the gradient fill
+                
                 ctx.beginPath();
-                ctx.moveTo(0, height - (data[0]-shiftY) * scaleY);
+                ctx.moveTo(0, getPixelFromPrice(data[0]) );
                 data.forEach((value, index) => {
                     const x = (graphWidth / (labels.length - 1)) * index;
-                    const y = height - (value-shiftY) * scaleY;
+                    const y = getPixelFromPrice(value);
                     ctx.lineTo(x, y);
                 });
                 ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
                 ctx.stroke();
+                
 
                 // Draw the labels
                 ctx.fillStyle = '#000';
