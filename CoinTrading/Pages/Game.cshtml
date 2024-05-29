@@ -118,7 +118,7 @@
                 // Get mouse position relative to the canvas
                 const rect = canvas.getBoundingClientRect();
                 lastMouseY = event.clientY - rect.top;
-                document.getElementById('myHoverPrice').style.top = `${event.clientY - 20}px`
+                document.getElementById('myHoverPrice').style.top = `${lastMouseY + 160}px`
                 document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
                 updateChart();
             });
@@ -207,14 +207,19 @@
                 gradient.addColorStop(0, 'rgba(25, 98, 139, 0.7)');
                 gradient.addColorStop(1, 'rgba(25, 98, 139, 0.0)');
 
-                // Draw the data points and lines with gradient fill
-                ctx.beginPath();
-                ctx.moveTo(0, getPixelFromPrice(data[0]) );
-                data.forEach((value, index) => {
-                    const x = (graphWidth / (labels.length - 1)) * index;
-                    const y = getPixelFromPrice(value);
-                    ctx.lineTo(x, y);
-                });
+
+                function drawGraphValues() {
+                    ctx.beginPath();
+                    ctx.moveTo(0, getPixelFromPrice(data[0]) );
+                    data.forEach((value, index) => {
+                        const x = (graphWidth / (labels.length - 1)) * index;
+                        const y = getPixelFromPrice(value);
+                        ctx.lineTo(x, y);
+                    });
+                }
+                
+                // Draw the gradient fill
+                drawGraphValues()
                 ctx.lineTo(width, height);
                 ctx.lineTo(0, height);
                 ctx.closePath();
@@ -223,14 +228,7 @@
 
                 
                 // Draw the line on top of the gradient fill
-                
-                ctx.beginPath();
-                ctx.moveTo(0, getPixelFromPrice(data[0]) );
-                data.forEach((value, index) => {
-                    const x = (graphWidth / (labels.length - 1)) * index;
-                    const y = getPixelFromPrice(value);
-                    ctx.lineTo(x, y);
-                });
+                drawGraphValues()
                 ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
                 ctx.stroke();
                 
