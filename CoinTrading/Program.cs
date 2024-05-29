@@ -22,7 +22,7 @@ namespace CoinTrading
             builder.Services.AddRazorPages(options =>
             {
                 options.Conventions.AddPageRoute("/RegisterError", "Register/{text?}");
-                options.Conventions.AddPageRoute("/LoginError", "Login/{text?}");
+                //options.Conventions.AddPageRoute("/LoginError", "Login/{text?}");
 
                 options.Conventions.AddPageRoute("/Logedin", "Index/{text?}");
 

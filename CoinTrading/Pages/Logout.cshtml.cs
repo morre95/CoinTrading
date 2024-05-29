@@ -8,9 +8,10 @@ namespace CoinTrading.Pages
     {
         public IActionResult OnGet()
         {
+            HttpContext.Session.SetInfoAlert($"Goodbye {HttpContext.Session.GetUsername()}!");
             HttpContext.Session.LogoutMe();
 
-            return RedirectToPage("./Index", new { text = "Goodbye!" });
+            return RedirectToPage("./Index");
         }
     }
 }

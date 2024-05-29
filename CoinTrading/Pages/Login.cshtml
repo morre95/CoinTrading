@@ -1,16 +1,11 @@
-﻿@page "{text?}"
+﻿@page
 @model CoinTrading.Pages.LoginModel
 @{
     ViewData["Title"] = "Login";
 }
 
+@Html.Raw(HttpContext.Session.GetAlert())
 
-@if (Model.Message != null)
-{
-    <div class="alert alert-danger" role="alert">
-        @Model.Message
-    </div>
-}
 
 <form method="POST">
     <div class="form-group">

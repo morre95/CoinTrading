@@ -53,6 +53,7 @@
 <div class="text-center">
     <h1 id="priceText" class="display-4">Live Coin Price</h1>
    
+    @Html.Raw(HttpContext.Session.GetAlert())
 
     <!-- Eriks ändringar -->
     <div id="myHoverPrice"></div>
