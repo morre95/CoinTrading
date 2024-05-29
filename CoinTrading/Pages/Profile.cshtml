@@ -1,0 +1,30 @@
+﻿@page
+@model CoinTrading.Pages.ProfileModel
+@{
+    ViewData["Title"] = "Profile";
+}
+<h1>@ViewData["Title"]</h1>
+<h2>Ändra profiluppgifter</h2>
+<form method="post">
+    <div>
+        <label>Username: </label>
+        <input asp-for="Username" disabled />
+    </div>
+    <div>
+        <label>Balance: </label>
+        <input asp-for="Balance" disabled />
+    </div>
+    <div>
+        <label>Nytt lösenord: </label>
+        <input asp-for="NewPassword" type="password" required />
+    </div>
+    <div>
+        <label>Bekräfta nytt lösenord: </label>
+        <input asp-for="ConfirmPassword" type="password" required />
+    </div>
+    <button type="submit">Spara ändringar</button>
+</form>
+
+<script>
+
+</script>

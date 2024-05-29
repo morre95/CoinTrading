@@ -1,3 +1,4 @@
+using CoinTrading.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Diagnostics;
@@ -31,46 +32,36 @@ namespace CoinTrading.Pages.Position
                 }
 
                 Debug.WriteLine(pos.GetTotalValue());
-
-                return new JsonResult(new { orderValue = pos.GetTotalValue() });
-            }
-
-            return new JsonResult(new { orderValue = 0 });
-        }
-
-        public IActionResult OnPost()
-        {
-            //var amount = Request.Form["amount"];
-            //var price = Request.Form["price"];
-            var leverage = Request.Form["leverage"];
-            var side = Request.Form["side"];
-
-            Position pos = new();
-            if (double.TryParse(Request.Form["amount"], out double amount) && double.TryParse(Request.Form["price"], out double price))
-            {
-                if (side == "buy")
-                {
-                    pos.Buy(amount, price);
-                }
-                else if (side == "sell")
-                {
-                    pos.Sell(amount, price);
-                }
-
-
+                int errorCount = 0;
                 double balance = HttpContext.Session.GetBalance();
-
                 if (pos.GetTotalValue() <= balance)
                 {
                     balance -= pos.GetTotalValue();
                     HttpContext.Session.SetBalance(balance);
 
+                    SystemDbContext db = new ();
+
+                    Users? user = db.Users.Where(u => u.Username == HttpContext.Session.GetUsername() && u.Email == HttpContext.Session.GetEmail()).Select(u => u).FirstOrDefault();
+
+                    if (user != null) 
+                    { 
+                        user.Balance = balance;
+                        db.SaveChanges();
+                        Debug.WriteLine($"Balance: {balance}");
+                    }
+                    else
+                    {
+                        errorCount++;
+                    }
+
+
                     // TODO: sapara i databas eller liknande...
                 }
 
+                return new JsonResult(new { orderValue = pos.GetTotalValue() });
             }
 
-            return new JsonResult(new { orderValue = pos.GetTotalValue() });
+            return new JsonResult(new { orderValue = 0 });
         }
     }
 

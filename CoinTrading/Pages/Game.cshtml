@@ -10,8 +10,7 @@
         align-items: flex-end;
         justify-content: center;
         margin-top: 20px;
-        padding-block-start: 100px;
-        padding-block-end: 100px;
+
     }
 
     .trade-form .form-group {
@@ -24,6 +23,8 @@
     .trade-form .form-group select {
         width: 100%; /* Modifierad till 100% för att ta upp hela bredden av .form-group */
         margin: auto;
+                background-color: #686968;
+                color: white;
     }
 
     .trade-form .buysell-buttons {
@@ -33,6 +34,11 @@
 
     #myHoverPrice {
         position: absolute;
+    }
+
+    input[type="text"], textarea, select {
+        background-color: #686968;
+        color: white;
     }
 </style>
 <div class="text-center">
@@ -262,6 +268,8 @@
         document.getElementById('buyBtn').addEventListener('click', (e) => {
 
             e.preventDefault();
+
+            console.log(urlBuilder("Position/OpenPosition", { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' }))
 
             $.getJSON(urlBuilder("Position/OpenPosition", { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' }), function (data) {
                 console.log(data)
