@@ -1,6 +1,8 @@
+using CoinTrading.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace CoinTrading.Pages
 {
@@ -48,6 +50,22 @@ namespace CoinTrading.Pages
             if (!ModelState.IsValid)
             {
                 return Page();
+            }
+
+            var username = Request.Form["username"];
+            var email = Request.Form["email"];
+            var password = Request.Form["password"];
+            var confirmPassword = Request.Form["confirmPassword"];
+
+            int id = 1; // TODO: fixa id i session
+
+            SystemDbContext db = new SystemDbContext();
+            Users? user = db.Users.FirstOrDefault(x => x.Id == id);
+
+            if (user != null) 
+            { 
+                user.Password = Helper.GetPasswordHash(password.ToString());
+                db.SaveChanges();
             }
 
             // Logik för att uppdatera lösenordet
