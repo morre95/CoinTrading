@@ -5,26 +5,30 @@
 }
 <h1>@ViewData["Title"]</h1>
 <h2>Ändra profiluppgifter</h2>
-<form method="post">
-    <div>
-        <label>Username: </label>
-        <input type="test" name="username" value="@Model.Username" disabled />
+<form method="post" id="profileForm">
+    <div class="form-group">
+        <label for="inputUsername">Username: </label>
+        <input type="text" name="username" class="form-control" id="inputUsername" value="@Model.Username" disabled />
+        <small id="usernameHelp" class="form-text text-muted">Your username cannot be changed.</small>
     </div>
-    <div>
-        <label>Balance: </label>
-        <input type="test" name="balance" value="@Model.Balance" disabled />
+    <div class="form-group">
+        <label for="inputBalance">Balance: </label>
+        <input type="text" name="balance" class="form-control" id="inputBalance" value="@Model.Balance" disabled />
+        <small id="balanceHelp" class="form-text text-muted">Your current balance.</small>
     </div>
-    <div>
-        <label>Nytt lösenord: </label>
-        <input name="password" type="password" required />
+    <div class="form-group">
+        <label for="inputPassword">Nytt lösenord: </label>
+        <input name="password" type="password" class="form-control" id="inputPassword" placeholder="Enter new password" required />
     </div>
-    <div>
-        <label>Bekräfta nytt lösenord: </label>
-        <input name="confirmPassword" type="password" required />
+    <div class="form-group">
+        <label for="inputConfirmPassword">Bekräfta nytt lösenord: </label>
+        <input name="confirmPassword" type="password" class="form-control" id="inputConfirmPassword" placeholder="Confirm new password" required />
+        <small id="confirmPasswordFeedback" class="form-text text-muted"></small>
     </div>
-    <button type="submit">Spara ändringar</button>
+    <div class="form-group">
+        <br />
+        <button type="submit" class="btn btn-primary">Spara ändringar</button>
+    </div>
 </form>
 
-<script>
 
-</script>
