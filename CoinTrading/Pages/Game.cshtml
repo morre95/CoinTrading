@@ -221,19 +221,19 @@
                 ctx.fillStyle = gradient;
                 ctx.fill();
 
-                /**
+                
                 // Draw the line on top of the gradient fill
-                **
+                
                 ctx.beginPath();
-                ctx.moveTo(0, height - (data[0]-shiftY) * scaleY);
+                ctx.moveTo(0, getPixelFromPrice(data[0]) );
                 data.forEach((value, index) => {
                     const x = (graphWidth / (labels.length - 1)) * index;
-                    const y = height - (value-shiftY) * scaleY;
+                    const y = getPixelFromPrice(value);
                     ctx.lineTo(x, y);
                 });
                 ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
                 ctx.stroke();
-                **/
+                
 
                 // Draw the labels
                 ctx.fillStyle = '#000';
