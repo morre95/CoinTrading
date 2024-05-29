@@ -23,7 +23,7 @@ namespace CoinTrading.Pages
         {
             if (!HttpContext.Session.IsLogedin())
             {
-                RedirectToPage("./Index");
+                return RedirectToPage("./Index");
             }
 
             Username = HttpContext.Session.GetUsername();
