@@ -10,12 +10,18 @@ db_path = os.path.join(base_dir, 'Data', 'data.db')
 conn = sqlite3.connect(db_path)
 c = conn.cursor()
 
+
+#c.execute('DROP TABLE users')
+#conn.commit()
+
 # Skapa en tabell för användare om den inte redan finns
 c.execute('''CREATE TABLE IF NOT EXISTS users (
              id INTEGER PRIMARY KEY AUTOINCREMENT, 
              username TEXT, 
              password TEXT,
              email TEXT, 
+             token TEXT,
+             balance REAL,
              timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 conn.commit()
 
@@ -25,14 +31,15 @@ def add_user(username, password, email):
 
 # Lägg till en ny användare varje sekund
 try:
-    while True:
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        username = f"user_{timestamp}"
-        password = "password123"  # Du kan generera eller få ett lösenord på ett mer dynamiskt sätt
-        email = f"{username}@example.com"
-        add_user(username, password, email)
-        print(f"Lagt till användare: {username}")
-        time.sleep(2)
+    pass
+   # while True:
+        #timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+       # username = f"user_{timestamp}"
+       # password = "password123"  # Du kan generera eller få ett lösenord på ett mer dynamiskt sätt
+       # email = f"{username}@example.com"
+       # add_user(username, password, email)
+       # print(f"Lagt till användare: {username}")
+       # time.sleep(2)
 except KeyboardInterrupt:
     pass
 finally:

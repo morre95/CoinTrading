@@ -5,11 +5,23 @@ namespace CoinTrading.Pages
 {
     public class GameModel : PageModel
     {
+        public bool IsLoegin { get; set; } = false;
         public void OnGet()
         {
             string? username = HttpContext.Session.GetUsername();
+            double balance = HttpContext.Session.GetBalance();
 
-            if (username != null) ViewData["Username"] = username;
+            IsLoegin = HttpContext.Session.IsLogedin();
+
+            if (username != null)
+            {
+                ViewData["Username"] = username;
+                ViewData["Balance"] = balance;
+            }
         }
+
+        
     }
+
+    
 }

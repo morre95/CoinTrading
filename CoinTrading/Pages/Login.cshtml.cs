@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
+using System.Collections.Specialized;
 using System.Diagnostics;
 
 namespace CoinTrading.Pages
@@ -18,31 +20,85 @@ namespace CoinTrading.Pages
             DB = new SystemDbContext();
         }
 
-        public void OnGet(string? text)
+        public IActionResult OnGet(string? text)
         {
-            Message = text;
-            string? username = HttpContext.Session.GetUsername();
+            if (HttpContext.Session.IsLogedin() || CheckCookieLoggedin()) 
+            {
+                return RedirectToPage("./Index", new { text = $"Wellcome {HttpContext.Session.GetUsername()}" });
+            }
 
-            if (username != null) ViewData["Username"] = username;
+            Message = text;
+
+            string? username = HttpContext.Session.GetUsername();
+            double balance = HttpContext.Session.GetBalance();
+
+            if (username != null)
+            {
+                ViewData["Username"] = username;
+                ViewData["Balance"] = balance;
+            }
+
+            return Page();
         }
 
-        public IActionResult OnPost()
+        public IActionResult OnPostAsync()
         {
             var username = Request.Form["username"];
             var password = Request.Form["password"];
+            var rememberMe = Request.Form["rememberMe"];
 
             IQueryable<Users> users = from u in DB.Users
                            where u.Username == username.ToString() && u.Password == Helper.GetPasswordHash(password.ToString())
                            select u;
 
-            if (users.Count() > 0)
+            if (users.Count() == 1)
             {
                 Users user = users.First();
+
+                if (rememberMe == "on")
+                {
+                    user.Token = SetCookies(user.Username);
+                    DB.SaveChanges();
+                }
+
                 HttpContext.Session.LoginMe(user);
                 return RedirectToPage("./Index", new { text = $"Wellcome {user.Username}!" });
             }
 
             return RedirectToPage("./Login", new { text = "Wrong Username or Password" });
+        }
+
+        public string SetCookies(string username)
+        {
+            string token = Guid.NewGuid().ToString();
+            HttpContext.Response.Cookies.Append("token", token);
+            HttpContext.Response.Cookies.Append("username", username);
+            HttpContext.Response.Cookies.Append("expires", DateTimeOffset.Now.AddDays(30).ToString());
+
+            return token;
+        }
+
+        public bool CheckCookieLoggedin()
+        {
+            if (HttpContext.Session.IsLogedin()) return true;
+
+            string? expires = HttpContext.Request.Cookies["expires"];
+
+            if (expires != null && DateTimeOffset.TryParse(expires, out DateTimeOffset exDate) && exDate >= DateTimeOffset.Now)
+            {
+                string? token = HttpContext.Request.Cookies["token"];
+                string? username = HttpContext.Request.Cookies["username"];
+                if (token != null && username != null)
+                {
+                    Users? user = DB.Users.FirstOrDefault(x => x.Token == token && x.Username == username);
+                    if (user != null) 
+                    { 
+                        HttpContext.Session.LoginMe(user);
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

@@ -18,13 +18,16 @@ namespace CoinTrading.Pages
             DB = new SystemDbContext();
         }
 
-        public void OnGet(string? text)
+        public IActionResult OnGet(string? text)
         {
             Message = text;
 
-            string? username = HttpContext.Session.GetUsername();
+            if (HttpContext.Session.IsLogedin())
+            {
+                return RedirectToPage("./Index");
+            }
 
-            if (username != null) ViewData["Username"] = username;
+            return Page();
         }
 
         public IActionResult OnPost()
@@ -74,7 +77,8 @@ namespace CoinTrading.Pages
 
             user.Username = username;
             user.Email = email;
-            user.Password = Helper.GetPasswordHash(password);
+            user.Password = Helper.GetPasswordHash(password.ToString());
+            user.Balance = 10_000.0;
 
             DB.Add(user);
             DB.SaveChanges();

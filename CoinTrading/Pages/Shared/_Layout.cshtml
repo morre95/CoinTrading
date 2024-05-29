@@ -28,10 +28,33 @@
                             <a class="nav-link text-light" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-page="/Login">Login</a>
+                            @if (ViewData["Username"] != null)
+                            {
+                                <a class="nav-link text-light" asp-area="" asp-page="/Logout">Logout</a>
+                            }
+                            else
+                            {
+                                <a class="nav-link text-light" asp-area="" asp-page="/Login">Login</a>
+                            }
                         </li>
                     </ul>
-                    <h3 class="text-light">@ViewData["Username"]</h3>
+                    @if (ViewData["Username"] != null)
+                    {
+                        <style>
+                            .my-balance {
+                                opacity: 0.0;
+                                transition: all 800ms ease-in-out;
+
+                                margin-left: 10px;
+                            }
+
+                            .username-menu:hover + .my-balance {
+                                opacity: 1.0;
+                            }
+                        </style>
+                        <h3 class="text-light username-menu">@ViewData["Username"]</h3>
+                        <div class="text-light my-balance">$@ViewData["Balance"]</div>
+                    }
                 </div>
             </div>
         </nav>
@@ -43,12 +66,6 @@
             @RenderBody()
         </main>
     </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - CoinTrading - <a asp-area="" asp-page="/Privacy">Privacy</a>
-        </div>
-    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
