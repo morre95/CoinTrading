@@ -91,8 +91,6 @@
             const canvas = document.getElementById('lineChart');
             const ctx = canvas.getContext('2d');
 
-
-
             const width = canvas.width;
             const height = canvas.height;
             const graphWidth = width;
@@ -105,8 +103,6 @@
             let graphGapY = 0.3;
             let graphMinY = 0;
             let graphMaxY = 1;
-
-
 
             // Eriks ändringar
             let myPrice = 0;
@@ -212,7 +208,7 @@
                     ctx.beginPath();
                     ctx.moveTo(0, getPixelFromPrice(data[0]) );
                     data.forEach((value, index) => {
-                        const x = (graphWidth / (labels.length - 1)) * index;
+                        const x = (graphWidth / maxDataPoints) * index;
                         const y = getPixelFromPrice(value);
                         ctx.lineTo(x, y);
                     });
@@ -220,7 +216,7 @@
                 
                 // Draw the gradient fill
                 drawGraphValues()
-                ctx.lineTo(width, height);
+                ctx.lineTo((graphWidth / maxDataPoints)*(labels.length-1), height);
                 ctx.lineTo(0, height);
                 ctx.closePath();
                 ctx.fillStyle = gradient;
