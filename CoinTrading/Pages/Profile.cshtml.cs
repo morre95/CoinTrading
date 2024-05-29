@@ -10,22 +10,6 @@ namespace CoinTrading.Pages
     {
         private readonly ILogger<ProfileModel> _logger;
 
-        [BindProperty]
-        public string Username { get; set; }
-
-        [BindProperty]
-        public double Balance { get; set; }
-
-        [BindProperty]
-        [Required]
-        [DataType(DataType.Password)]
-        public string NewPassword { get; set; }
-
-        [BindProperty]
-        [Required]
-        [DataType(DataType.Password)]
-        [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
-        public string ConfirmPassword { get; set; }
 
         public ProfileModel(ILogger<ProfileModel> logger)
         {
@@ -34,14 +18,14 @@ namespace CoinTrading.Pages
 
         public void OnGet()
         {
-            Username = HttpContext.Session.GetUsername();
-            Balance = HttpContext.Session.GetBalance();
+            string? username = HttpContext.Session.GetUsername();
+            double balance = HttpContext.Session.GetBalance();
 
 
-            if (Username != null)
+            if (username != null)
             {
-                ViewData["Username"] = Username;
-                ViewData["Balance"] = Balance;
+                ViewData["Username"] = username;
+                ViewData["Balance"] = balance;
             }
         }
 
@@ -69,7 +53,7 @@ namespace CoinTrading.Pages
             }
 
             // Logik för att uppdatera lösenordet
-            _logger.LogInformation("Password for user {Username} is being updated.", Username);
+            _logger.LogInformation($"Password for user {HttpContext.Session.GetUsername()} is being updated.");
 
             // Uppdatera lösenordet här
 
