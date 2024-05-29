@@ -13,6 +13,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS positions
             id        INTEGER  PRIMARY KEY AUTOINCREMENT,
             userid    INTEGER, 
             symbol    TEXT, 
+            leverage  INTEGER,
             is_closed INTEGER  CHECK (is_closed IN (0, 1)) DEFAULT 0,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )''')
@@ -25,7 +26,6 @@ c.execute('''CREATE TABLE IF NOT EXISTS orders
             positionid   INTEGER, 
             open_price   REAL       DEFAULT 0.00, 
             close_price  REAL       DEFAULT 0.00,
-            leverage     INTEGER,
             type         TEXT,
             side         TEXT,
             timestamp    DATETIME   DEFAULT CURRENT_TIMESTAMP,

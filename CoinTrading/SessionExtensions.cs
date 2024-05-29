@@ -28,7 +28,7 @@ namespace CoinTrading
 
         public static double GetBalance(this ISession session)
         {
-            bool isDouble = double.TryParse((session.GetString("Balance") ?? "").Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double balnace);
+            bool isDouble = double.TryParse((session.GetString("Balance") ?? "").Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out double balnace);
 
             return isDouble ? balnace : 0.0;
         }

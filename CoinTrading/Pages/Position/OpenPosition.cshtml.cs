@@ -31,9 +31,11 @@ namespace CoinTrading.Pages.Position
                     pos.Sell(amount, price);
                 }
 
-                Debug.WriteLine(pos.GetTotalValue());
+                Debug.WriteLine("Pos value: " + pos.GetTotalValue());
                 int errorCount = 0;
                 double balance = HttpContext.Session.GetBalance();
+                Debug.WriteLine($"Balance: {balance}");
+                Debug.WriteLine($"if({pos.GetTotalValue() <= balance})");
                 if (pos.GetTotalValue() <= balance)
                 {
                     balance -= pos.GetTotalValue();
@@ -43,11 +45,13 @@ namespace CoinTrading.Pages.Position
 
                     Users? user = db.Users.Where(u => u.Username == HttpContext.Session.GetUsername() && u.Email == HttpContext.Session.GetEmail()).Select(u => u).FirstOrDefault();
 
+                    Debug.WriteLine($"User count: {user.Id}");
                     if (user != null) 
                     { 
                         user.Balance = balance;
                         db.SaveChanges();
                         Debug.WriteLine($"Balance: {balance}");
+
                     }
                     else
                     {

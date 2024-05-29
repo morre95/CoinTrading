@@ -58,7 +58,7 @@
             </div>
             <div class="form-group">
                 <label for="price">Price</label>
-                <input type="text" id="price" name="price" class="form-control" placeholder="Price">
+                <input type="number" step="0.01" id="price" name="price" class="form-control" placeholder="Price">
             </div>
             <div class="form-group">
                 <label for="amount">Amount</label>
@@ -161,7 +161,7 @@
                     element.innerText = currentPrice;
                     data.push(currentPrice);
                     labels.push(timestamp);
-                    updateChart();
+                    updateChart();   
                 } catch (error) {
                     console.error('Error fetching coin data:', error);
                 }
@@ -242,6 +242,10 @@
         const price = document.getElementById('price')
         const leverage = document.getElementById('leverage')
         const orderValue = document.getElementById('orderValue')
+        const marketType = document.getElementById('marketType')
+
+        if (marketType.value == 'market') price.disabled = true
+
 
         function urlBuilder(base, parmas) {
             let buildUrl = function (base, key, value) {
@@ -261,11 +265,20 @@
 
             e.preventDefault();
 
-            console.log(urlBuilder("Position/OpenPosition", { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' }))
-
-            $.getJSON(urlBuilder("Position/OpenPosition", { amount: amount.value, price: price.value, leverage: leverage.value, side: 'buy' }), function (data) {
+            $.getJSON(urlBuilder("Position/OpenPosition", { amount: price.value * amount.value, price: price.value, leverage: leverage.value, side: 'buy' }), function (data) {
                 console.log(data)
-            });
+            })
+        })
+
+        marketType.addEventListener('change', (event) => {
+            console.log(event.target.value)
+            if (event.target.value === "market") {
+                price.disabled = true
+                // TODO: uppdatera document.getElementById('price').value till det aktuella priset varje gång grafen uppdateras
+            } else {
+                // TODO: Stäng av auto uppdatringen av priset
+                price.disabled = false
+            }
         })
         
     </script>
