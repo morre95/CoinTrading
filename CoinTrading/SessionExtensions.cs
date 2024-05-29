@@ -21,6 +21,17 @@ namespace CoinTrading
             session.Set(key, BitConverter.GetBytes(value));
         }
 
+        /* public static void SetObject<T>(this ISession session, string key, T value)
+         {
+             session.SetString(key, JsonSerializer.Serialize(value));
+         }
+
+         public static T? GetObject<T>(this ISession session, string key)
+         {
+             var value = session.GetString(key);
+             return value == null ? default : JsonSerializer.Deserialize<T>(value);
+         }*/
+
         public static void SetBalance(this ISession session, double balance)
         {
             session.SetString("Balance", balance.ToString());
@@ -44,9 +55,17 @@ namespace CoinTrading
             return isId ? id : -1;
         }
 
+        public static void SetRedirect(this ISession session, string redirectTo)
+        {
+            session.SetString("redirectTo", redirectTo);
+        }
+
+        public static string? GetRedirect(this ISession session) => session.GetString("redirectTo");
+
         public static bool IsLogedin(this ISession session) => session.GetBool("logedin") == true;
         public static string? GetUsername(this ISession session) => session.GetString("Username");
         public static string? GetEmail(this ISession session) => session.GetString("Email");
+
 
         public static void LoginMe(this ISession session, Users user)
         {

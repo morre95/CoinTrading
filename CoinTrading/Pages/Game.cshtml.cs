@@ -13,6 +13,8 @@ namespace CoinTrading.Pages
 
             IsLoegin = HttpContext.Session.IsLogedin();
 
+            HttpContext.Session.SetRedirect("Game");
+
             if (username != null)
             {
                 ViewData["Username"] = username;

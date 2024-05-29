@@ -19,8 +19,13 @@ namespace CoinTrading.Pages
             _logger = logger;
         }
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
+            if (!HttpContext.Session.IsLogedin())
+            {
+                RedirectToPage("./Index");
+            }
+
             Username = HttpContext.Session.GetUsername();
             Balance = HttpContext.Session.GetBalance();
 
@@ -30,6 +35,8 @@ namespace CoinTrading.Pages
                 ViewData["Username"] = Username;
                 ViewData["Balance"] = Balance;
             }
+
+            return Page();
         }
 
         public IActionResult OnPost()

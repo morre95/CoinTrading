@@ -20,11 +20,20 @@ namespace CoinTrading.Pages
             DB = new SystemDbContext();
         }
 
+        private string GetRedirectPage()
+        {
+            string? redirectPage = HttpContext.Session.GetRedirect();
+            if (string.IsNullOrEmpty(redirectPage)) redirectPage = "./Index";
+
+            HttpContext.Session.SetRedirect("");
+            return redirectPage;
+        }
+
         public IActionResult OnGet(string? text)
         {
             if (HttpContext.Session.IsLogedin() || CheckCookieLoggedin()) 
             {
-                return RedirectToPage("./Index", new { text = $"Wellcome {HttpContext.Session.GetUsername()}" });
+                return RedirectToPage(GetRedirectPage(), new { text = $"Wellcome {HttpContext.Session.GetUsername()}" });
             }
 
             Message = text;
@@ -62,7 +71,7 @@ namespace CoinTrading.Pages
                 }
 
                 HttpContext.Session.LoginMe(user);
-                return RedirectToPage("./Index", new { text = $"Wellcome {user.Username}!" });
+                return RedirectToPage(GetRedirectPage(), new { text = $"Wellcome {user.Username}!" });
             }
 
             return RedirectToPage("./Login", new { text = "Wrong Username or Password" });
