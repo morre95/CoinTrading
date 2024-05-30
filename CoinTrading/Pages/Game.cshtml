@@ -130,26 +130,45 @@
             let labels = [];
             let data = [];
 
-            let zoomOutAxisY = 0.2;
+            let zoomOutAxisY = 0.75;
             let graphMinY = 0;
             let graphMaxY = 1;
 
-            // Eriks ändringar
             let myPrice = 0;
-            // Slut på Eriks ändringar
 
             const maxDataPoints = 300; // Assuming 1 data point per second for 5 minutes
 
+
+            // first load in old stored data to catch up
+            const init = async () => {
+                try {
+                    const response = await fetch('@Url.Page("prices")');
+                    const result = await response.json();
+
+                    for(let i = 0 ; i < result.prices.length && i<maxDataPoints; i++) {
+                        var price = result.prices[i].close_price;
+                        var timestamp = result.prices[i].timestamp;
+                        data.push(price);
+                        labels.push(timestamp);
+
+                        console.log(price);
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching coin data:', error);
+                }
+            };
+            init();
+
             canvas.addEventListener('wheel', (event) => {
                 event.preventDefault(); 
-                let maxZoom = 0.1;
-                zoomOutAxisY += event.deltaY*0.1;
-                if (zoomOutAxisY < maxZoom) zoomOutAxisY = maxZoom;
+                zoomOutAxisY += event.deltaY*0.0005;
+                if (zoomOutAxisY <0 ) zoomOutAxisY = 0;
+
                 updateChart();
             });
 
             canvas.addEventListener('mousemove', (event) => {
-                // Get mouse position relative to the canvas
                 const rect = canvas.getBoundingClientRect();
                 lastMouseY = event.clientY - rect.top;
                 document.getElementById('myHoverPrice').style.top = `${lastMouseY + 160}px`
@@ -179,25 +198,34 @@
                 document.getElementById('myHoverPrice').innerText = myPrice
             }
 
+            /*
+             * översätter från en viss pixelkoordinat pixelY till ett pris som stämmer med den pixeln 
+             */
             function getPriceFromPixelY(pixelY) {
                 var graphRange = graphMaxY-graphMinY;
                 var ratio = 1-pixelY/height
                 return ratio*graphRange+graphMinY;
             }
 
+             /*
+             * översätter från ett pris price till en pixelkoordinat som stämmer med det priset
+             */
             function getPixelFromPrice(price) {
                 var graphRange = graphMaxY-graphMinY;
                 var ratio = (price-graphMinY)/graphRange;
                 return  height - ratio*height;
             }
 
+             /*
+             * uppdaterar höjden på grafjäveln så att den alltid rimmer priset som finns i dat.
+             */
             function updateGraphYRange() {
                 let maxValue = Math.max(...data);
                 let minValue = Math.min(...data);
                 let priceRange = maxValue-minValue;
-                let graphExtend = priceRange*Math.pow(zoomOutAxisY, 1/2);
-                let minStretchFactor =minValue*0.001; // set to 1% here 
-                if (graphExtend < minStretchFactor)graphExtend = minStretchFactor
+                let graphExtend = priceRange*Math.pow(zoomOutAxisY, 4);
+
+
                 graphMinY = minValue-graphExtend;
                 graphMaxY = maxValue+graphExtend;
             }
@@ -207,16 +235,15 @@
                     const response = await fetch('@Url.Page("latestprice")');
                     const result = await response.json();
                     currentPrice = result.price.close_price;
-                    const timestamp = new Date().toLocaleTimeString();
+                    var timestamp = result.price.timestamp;
 
                     // Update labels and data
                     if (labels.length >= maxDataPoints) {
                         labels.shift();
                         data.shift();
                     }
-                    var element = document.getElementById("priceText");
 
-                    element.innerText = currentPrice;
+                    document.getElementById("priceText").innerText = currentPrice;
                     data.push(currentPrice);
                     labels.push(timestamp);
                     updateChart();   
@@ -286,9 +313,7 @@
                  if (document.getElementById('marketType').value === "market") {
                     price.disabled = true
                     document.getElementById('price').value = currentPrice;
-                    // TODO: uppdatera document.getElementById('price').value till det aktuella priset varje gång grafen uppdateras
                 } else {
-                    // TODO: Stäng av auto uppdatringen av priset
                     price.disabled = false
                 }
                 };
