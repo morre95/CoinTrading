@@ -1,6 +1,7 @@
 using CoinTrading.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -24,8 +25,6 @@ namespace CoinTrading.Pages.Position
             Debug.WriteLine("amount2: " + amount2);
             Debug.WriteLine("price2: " + price2);
 
-            
-
             if (double.TryParse(Request.Query["amount"].ToString().Replace('.', ','), out double amount) &&
                 double.TryParse(Request.Query["price"].ToString().Replace('.', ','), out double price) &&
                 int.TryParse(Request.Query["leverage"], out int leverage))
@@ -36,22 +35,21 @@ namespace CoinTrading.Pages.Position
                 double balance = HttpContext.Session.GetBalance();
                 CoinPairs[]? coinBalance = HttpContext.Session.GetCoinBalance();
 
-
-                Position pos = new();
+                PositionCalculator posCalc = new();
                 if (side == "buy")
                 {
-                    pos.Buy(amount, price);
+                    posCalc.Buy(amount, price);
                 }
                 else if (side == "sell")
                 {
-                    pos.Sell(amount, price);
+                    posCalc.Sell(amount, price);
                 }
 
-                Debug.WriteLine("Pos value: " + pos.GetBTCValue());
+                Debug.WriteLine("Pos value: " + posCalc.GetBTCValue());
 
                 Debug.WriteLine($"Balance: {balance}");
-                Debug.WriteLine($"if(pos.GetTotalValue() <= balance): {pos.GetBTCValue() <= balance}");
-                if (pos.GetBTCValue() <= balance)
+                Debug.WriteLine($"if(pos.GetTotalValue() <= balance): {posCalc.GetBTCValue() <= balance}");
+                if (amount <= balance)
                 {
                     balance -= amount;
                     
@@ -60,23 +58,60 @@ namespace CoinTrading.Pages.Position
                     if (coinBalance == null)
                     {
                         coinBalance = new CoinPairs[1];
-                        coinBalance[0] = new CoinPairs { Pair = CoinPairs.AvailablePair.btcusdt, Value = pos.GetBTCValue() };
+                        coinBalance[0] = new CoinPairs { Pair = CoinPairs.AvailablePair.btcusdt, Value = posCalc.GetBTCValue() };
                     }
                     else
                     {
-                        coinBalance[0].Value += pos.GetBTCValue();
+                        coinBalance[0].Value += posCalc.GetBTCValue();
                         HttpContext.Session.SetCoinBalance(coinBalance);
                     }
 
                     SystemDbContext db = new();
 
-                    Users? user = db.Users.Where(u => u.Id == HttpContext.Session.GetUserId()).Select(u => u).FirstOrDefault();
+                    //Users? user = db.Users.Where(u => u.Id == HttpContext.Session.GetUserId()).Select(u => u).FirstOrDefault();
+                    Users? user = db.Users.FirstOrDefault(u => u.Id == HttpContext.Session.GetUserId());
 
                     if (user != null)
                     {
                         user.Balance = balance;
                         user.CoinBlances = coinBalance;
                         db.SaveChanges();
+
+                        Positions? pos = db.Positions.FirstOrDefault(p => p.Userid == user.Id && p.is_closed == 0);
+                        //var positions = db.Positions.Where(p => p.Userid == user.Id).ToList();
+                        //Positions? pos = positions.FirstOrDefault(p => !p.IsClosed);
+
+                        if (pos == null) 
+                        {
+                            pos = new();
+                            pos.Userid = user.Id;
+                            pos.Symbol = "BTCUSDT";
+                            pos.Leverage = leverage;
+                            pos.IsClosed = false;
+                            db.Add(pos);
+                            db.SaveChanges();
+
+                            Orders order = new();
+                            order.Positionid = pos.Id;
+                            order.OpenPrice = price;
+                            order.Amount = amount;
+                            order.Type = type;
+                            order.Side = side;
+                            db.Add(order);
+                            db.SaveChanges();
+                        }
+                        else
+                        {
+                            Orders order = new();
+                            order.Positionid = pos.Id;
+                            order.OpenPrice = price;
+                            order.Amount = amount;
+                            order.Type = type;
+                            order.Side = side;
+                            db.Add(order);
+                            db.SaveChanges();
+                        }
+
                         Debug.WriteLine($"Balance: {balance}");
                         Debug.WriteLine($"coinBalance[0].Value: {coinBalance[0].Value}");
                     }
@@ -88,18 +123,19 @@ namespace CoinTrading.Pages.Position
                 }
                 else
                 {
-                    return new JsonResult(new { error = $"Balance not sufficient. Your balance: {balance}, Order value: {pos.GetBTCValue()}. Or you are not loged in" });
+                    return new JsonResult(new { error = $"Balance not sufficient. Your balance: {balance}, Order value: {posCalc.GetBTCValue()}. Or you are not loged in" });
                 }
 
                 object jsonData = new
                 {
-                    orderValue = pos.GetBTCValue(),
-                    pAndL = pos.GetFinalPAndL(),
-                    averageEntry = pos.GetAvgEntryPrice(),
+                    orderValue = posCalc.GetBTCValue(),
+                    pAndL = posCalc.GetFinalPAndL(),
+                    averageEntry = posCalc.GetAvgEntryPrice(),
                     price,
                     amount,
                     side,
                     type,
+                    balance
                 };
 
                 return new JsonResult(jsonData);
@@ -109,17 +145,7 @@ namespace CoinTrading.Pages.Position
         }
     }
 
-    public class Order
-    {
-        public enum OrderType { limiit, market }
-        public enum OrderSide { buy, sell }
-        public double Price { get; set; }
-        public double Amount { get; set; }
-        public int Leverage { get; set; }
-        public double OrderValue { get; set; }
-    }
-
-    public class Position
+    public class PositionCalculator
     {
         private double Amount { get; set; }
         private double TotalBTCValue { get; set; }

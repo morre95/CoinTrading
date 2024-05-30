@@ -9,6 +9,8 @@ namespace CoinTrading.Api
     {
         public DbSet<Users> Users { get; set; }
         public DbSet<Prices> Prices { get; set; }
+        public DbSet<Positions> Positions { get; set; }
+        public DbSet<Orders> Orders { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -51,5 +53,37 @@ namespace CoinTrading.Api
         public double high_price { get; set; }
         public double low_price { get; set; }
         public string? timestamp { get; set; }
+    }
+
+    public class Positions
+    {
+        public int Id { get; set; }
+        public int Userid { get; set; }
+        public string? Symbol { get; set; }
+        public int Leverage { get; set; }
+
+        [NotMapped]
+        public bool IsClosed { get => is_closed == 1; set { is_closed = Convert.ToInt32(value); } }
+
+        public int is_closed { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
+    public class Orders
+    {
+        public int Id { get; set; }
+        public int Positionid { get; set; }
+
+        [Column("open_price")]
+        public double OpenPrice { get; set; }
+
+        [Column("close_price")]
+        public double ClosePrice { get; set; }
+
+        public double Amount { get; set; }
+
+        public string? Type { get; set; }
+        public string? Side { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 }

@@ -98,10 +98,10 @@
         <!-- Hover Price and Stats -->
         <div id="myHoverPrice"></div>
         <div class="stats">
-            <div id="balance">Balance: $0.00</div>
-            <div id="entryPrice">Average Entry Price: $0.00</div>
-            <div id="orderValue">Order Value: $0.00</div>
-            <div id="pl">P&L: $0.00</div>
+            <div>Balance: <span id="balance">$0.00</span></div>
+            <div>Average Entry Price: <span id ="entryPrice">$0.00</span></div>
+            <div>Order Value: <span id="orderValue">$0.00</span></div>
+            <div>P&L: <span id="pAndl">$0.00</span></div>
         </div>
 
         <!-- Chart -->
@@ -120,7 +120,7 @@
                 <!-- Order Type -->
                 <div class="form-group">
                     <label for="marketType">Order Type</label>
-                    <select id="marketType" name="marketType" class="form-control">
+                <select id="marketType" name="marketType" class="form-control" @(!Model.IsLoegin ? "disabled" : "")>
                         <option value="market">Market</option>
                         <option value="limit">Limit</option>
                     </select>
@@ -129,7 +129,8 @@
                 <!-- Leverage -->
                 <div class="form-group">
                     <label for="leverage">Leverage</label>
-                    <select id="leverage" name="leverage" class="form-control" disabled>
+                <select id="leverage" name="leverage" class="form-control" disabled>
+                    <!-- TODO: lägg till disabled ifstatsen när det är dagst att köra med leverage skarpt -->
                         @for (int i = 1; i <= 100; i++)
                         {
                             if (i == 10)
@@ -147,19 +148,19 @@
                 <!-- Price -->
                 <div class="form-group">
                     <label for="price">Price</label>
-                    <input type="number" step="0.01" id="price" name="price" class="form-control" placeholder="Price">
+                <input type="number" step="0.01" id="price" name="price" class="form-control" placeholder="Price" @(!Model.IsLoegin ? "disabled" : "")>
                 </div>
 
                 <!-- Amount -->
                 <div class="form-group">
                     <label for="amount">Amount</label> <small id="total-value"></small>
-                    <input type="text" id="amount" name="amount" class="form-control" placeholder="Amount">
+                <input type="text" id="amount" name="amount" class="form-control" placeholder="Amount" @(!Model.IsLoegin ? "disabled" : "")>
                 </div>
 
                 <!-- Buy/Sell Buttons -->
                 <div class="buysell-buttons">
-                    <button class="btn btn-primary buy-sell-btn">Buy</button>
-                    <button class="btn btn-danger buy-sell-btn">Sell</button>
+                <button class="btn btn-primary buy-sell-btn" @(!Model.IsLoegin ? "disabled" : "")> Buy</button>
+                <button class="btn btn-danger buy-sell-btn" @(!Model.IsLoegin ? "disabled" : "")>Sell</button>
                 </div>
             </div>
         
@@ -519,11 +520,43 @@
 
                 console.log(side)
 
-                $.getJSON(urlBuilder("Position/OpenPosition", { amount: parseFloat(amount.value), price: parseFloat(price.value), leverage: parseInt(leverage.value), side: side, type: marketType.value }), function (data) {
-                    console.log(data)
+                $.getJSON(urlBuilder("Position/OpenPosition", { amount: parseFloat(amount.value), price: parseFloat(price.value), leverage: parseInt(leverage.value), side: side, type: marketType.value.toLowerCase() }), function (data) {
+                    if (Object.hasOwn(data, 'error')) {
+                        console.log(data.error)
+                    } else if (data.type.toLowerCase() === "market") {
+                        document.getElementById('balance').innerHTML = `$${data.balance}`
+                        document.getElementById('entryPrice').innerHTML = `$${data.averageEntry}`
+                        document.getElementById('orderValue').innerHTML = `$${data.orderValue.toFixed(8)}`
+                        document.getElementById('pAndl').innerHTML = `$${data.pAndL}`
+                        console.log(data)
+                    }
                 })
             })
         })
+
+        setInterval(() => {
+            $.getJSON('Position/GetOpenPosition', (data) => {
+                console.log(data)
+                if (Object.hasOwn(data, 'error')) { return }
+                // GetQuantity() * ((1 / GetAvgEntryPrice()) - (1 / price));
+                //{avgPrice: 272986.07, sumAmount: 813}
+
+                
+                // TODO: Kolla med Gustav om det går att få tag i myPrice variabeln eller liknande på något annat sätt
+                //document.getElementById('pAndl').innerHTML = data.sumAmount * ((1 / data.avgPrice - (1 / myPrice)))
+
+                // Fullösning
+                let sumAmount = data.sumAmount, avgPrice = data.avgPrice
+                $.getJSON('LatestPrice', (priceData) => {
+                    let pAndL = sumAmount * ((1 / avgPrice - (1 / priceData.price.close_price))).toFixed(8)
+                    let el = document.getElementById('pAndl')
+                    el.innerHTML = pAndL + "&#8383;"
+
+                    if (pAndL >= 0) el.style.color = "#a8dfac"
+                    else el.style.color = "#dfa8a8"
+                })
+            })
+        }, 1000);
 
     </script>
 }
