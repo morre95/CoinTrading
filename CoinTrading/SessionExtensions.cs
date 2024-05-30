@@ -1,6 +1,7 @@
 ﻿using CoinTrading.Api;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
+using System.Text.Json;
 
 namespace CoinTrading
 {
@@ -42,6 +43,19 @@ namespace CoinTrading
             bool isDouble = double.TryParse((session.GetString("Balance") ?? "").Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out double balnace);
 
             return isDouble ? balnace : 0.0;
+        }
+
+        public static void SetCoinBalance(this ISession session, params object[] obj)
+        {
+            object[] old = session.GetCoinBalance() ?? Array.Empty<object[]>;
+
+            session.SetString("Balance-coins", JsonSerializer.Serialize(old.Concat(obj).ToArray()));
+        }
+
+        public static object[]? GetCoinBalance(this ISession session)
+        {
+            var value = session.GetString("Balance-coins");
+            return value == null ? default : JsonSerializer.Deserialize<object[]>(value);
         }
 
         public static void SetUserId(this ISession session, int id)
