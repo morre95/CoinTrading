@@ -75,9 +75,10 @@ namespace CoinTrading.Pages.Position
                     if (user != null)
                     {
                         user.Balance = balance;
-                        user.CoinBlances = JsonSerializer.Serialize(coinBalance);
+                        user.CoinBlances = coinBalance;
                         db.SaveChanges();
                         Debug.WriteLine($"Balance: {balance}");
+                        Debug.WriteLine($"coinBalance[0].Value: {coinBalance[0].Value}");
                     }
                     else
                     {

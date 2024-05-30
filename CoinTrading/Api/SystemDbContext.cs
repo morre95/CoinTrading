@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CoinTrading.Pages.Position;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace CoinTrading.Api
 {
@@ -27,7 +30,16 @@ namespace CoinTrading.Api
         public string? Email { get; set; }
         public string? Token { get; set; }
         public double Balance { get; set; }
-        public string? CoinBlances { get; set; }
+
+        [NotMapped]
+        public CoinPairs[]? CoinBlances { 
+            get => coin_balances != null ? JsonSerializer.Deserialize<CoinPairs[]>(coin_balances) ?? default : default; 
+            set { 
+                if (value != null) coin_balances = JsonSerializer.Serialize(value); 
+            } 
+        }
+
+        public string? coin_balances { get; set; }
     }
 
     public class Prices

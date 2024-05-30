@@ -14,6 +14,9 @@ c = conn.cursor()
 #c.execute('DROP TABLE users')
 #conn.commit()
 
+#c.execute('ALTER TABLE users ADD COLUMN coin_balances REAL')
+#conn.commit()
+
 # Skapa en tabell för användare om den inte redan finns
 c.execute('''CREATE TABLE IF NOT EXISTS users (
              id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -22,7 +25,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS users (
              email TEXT, 
              token TEXT,
              balance REAL,
-             coin_balances TEXT,
+             coin_balances REAL,
              timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 conn.commit()
 

@@ -67,7 +67,7 @@ namespace CoinTrading.Pages
 
                 if (rememberMe == "on")
                 {
-                    user.Token = SetCookies(user.Username);
+                    user.Token = SetCookies(user.Username ?? "");
                     DB.SaveChanges();
                 }
 
@@ -82,12 +82,16 @@ namespace CoinTrading.Pages
 
         public string SetCookies(string username)
         {
-            string token = Guid.NewGuid().ToString();
-            HttpContext.Response.Cookies.Append("token", token);
-            HttpContext.Response.Cookies.Append("username", username);
-            HttpContext.Response.Cookies.Append("expires", DateTimeOffset.Now.AddDays(30).ToString());
+            if (!string.IsNullOrWhiteSpace(username)) 
+            { 
+                string token = Guid.NewGuid().ToString();
+                HttpContext.Response.Cookies.Append("token", token);
+                HttpContext.Response.Cookies.Append("username", username);
+                HttpContext.Response.Cookies.Append("expires", DateTimeOffset.Now.AddDays(30).ToString());
 
-            return token;
+                return token;
+            }
+            return "";
         }
 
         public bool CheckCookieLoggedin()

@@ -118,7 +118,7 @@
                 <!-- Leverage -->
                 <div class="form-group">
                     <label for="leverage">Leverage</label>
-                    <select id="leverage" name="leverage" class="form-control">
+                    <select id="leverage" name="leverage" class="form-control" disabled>
                         @for (int i = 1; i <= 100; i++)
                         {
                             if (i == 10)
@@ -481,7 +481,7 @@
             let a = parseFloat(amount.value)
             let l = parseInt(leverage.value)
             if (Number.isFinite(p) && Number.isFinite(a) && Number.isInteger(l)) {
-                document.getElementById('total-value').innerHTML = `: ${(a / p) * l} &#8383;`
+                document.getElementById('total-value').innerHTML = `: ${(a / p).toFixed(8)} &#8383;` /*`: ${((a / p) * l).toFixed(8)} &#8383;`*/
             }
         }
 
