@@ -27,6 +27,7 @@ namespace CoinTrading.Api
         public string? Email { get; set; }
         public string? Token { get; set; }
         public double Balance { get; set; }
+        public string? CoinBlances { get; set; }
     }
 
     public class Prices

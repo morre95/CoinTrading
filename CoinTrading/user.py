@@ -22,6 +22,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS users (
              email TEXT, 
              token TEXT,
              balance REAL,
+             coin_balances TEXT,
              timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 conn.commit()
 

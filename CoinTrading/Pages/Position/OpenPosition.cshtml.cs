@@ -2,6 +2,7 @@ using CoinTrading.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace CoinTrading.Pages.Position
 {
@@ -61,6 +62,11 @@ namespace CoinTrading.Pages.Position
                         coinBalance = new CoinPairs[1];
                         coinBalance[0] = new CoinPairs { Pair = CoinPairs.AvailablePair.btcusdt, Value = pos.GetBTCValue() };
                     }
+                    else
+                    {
+                        coinBalance[0].Value += pos.GetBTCValue();
+                        HttpContext.Session.SetCoinBalance(coinBalance);
+                    }
 
                     SystemDbContext db = new();
 
@@ -69,6 +75,7 @@ namespace CoinTrading.Pages.Position
                     if (user != null)
                     {
                         user.Balance = balance;
+                        user.CoinBlances = JsonSerializer.Serialize(coinBalance);
                         db.SaveChanges();
                         Debug.WriteLine($"Balance: {balance}");
                     }
