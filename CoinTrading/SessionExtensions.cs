@@ -45,12 +45,12 @@ namespace CoinTrading
             return isDouble ? balnace : 0.0;
         }
 
-        public static void SetCoinBalance(this ISession session, params object[] obj)
+        /*public static void SetCoinBalance(this ISession session, params object[] obj)
         {
             object[] old = session.GetCoinBalance() ?? Array.Empty<object[]>;
 
             session.SetString("Balance-coins", JsonSerializer.Serialize(old.Concat(obj).ToArray()));
-        }
+        }*/
 
         public static object[]? GetCoinBalance(this ISession session)
         {
