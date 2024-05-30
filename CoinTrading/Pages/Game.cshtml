@@ -180,6 +180,11 @@
             let labels = [];
             let data = [];
 
+            let limitOrders = [];
+            //lägger till påhittade data för att testa bara
+            limitOrders.push(68000.0);
+            limitOrders.push(69000.0);
+
             let zoomOutAxisY = 0.75;
             let graphMinY = 0;
             let graphMaxY = 1;
@@ -432,6 +437,18 @@
                         ctx.fillText(Number(price).toFixed(2), x+20, y);
                 }
 
+                //draw the orders
+                ctx.strokeStyle = 'rgba(41, 124, 179, 1)';
+                ctx.textAlign = 'right';
+                limitOrders.forEach((order) => {
+                    ctx.beginPath();
+                    let y = getPixelFromPrice(order);
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(graphWidth, y);
+                    ctx.stroke();
+
+                    ctx.fillText(Number(order).toFixed(2), graphWidth, y);
+                });
 
                 //draw lines and text on mouse
                 drawMouseTooltip();
