@@ -23,6 +23,7 @@ namespace CoinTrading.Pages
         {
             if (!HttpContext.Session.IsLogedin())
             {
+                HttpContext.Session.SetDangerAlert("You are not allowed here");
                 return RedirectToPage("./Index");
             }
 
@@ -66,7 +67,7 @@ namespace CoinTrading.Pages
             _logger.LogInformation($"Password for user {HttpContext.Session.GetUsername()} is being updated.");
 
             // Uppdatera lösenordet här
-
+            HttpContext.Session.SetSuccessAlert($"Password for user {HttpContext.Session.GetUsername()} is being updated.");
             return RedirectToPage("Profile");
         }
         //TODO: Add a method to change the password

@@ -49,10 +49,18 @@
         color: white;
         font-size: 1.2em;
     }
+
+    #lineChart {
+        border: 1px solid #000;
+        background-image: url('Images/graphbg.png');
+        background-color: #0D2738;
+        background-size: cover;
+    }
 </style>
 <div class="text-center">
     <h1 id="priceText" class="display-4">Live Coin Price</h1>
    
+    @Html.Raw(HttpContext.Session.GetAlert())
 
     <!-- Eriks ändringar -->
     <div id="myHoverPrice"></div>
@@ -283,6 +291,7 @@
                 
                 // Draw the gradient fill
                 drawGraphValues()
+                ctx.lineWidth = 3 //thicker graph line
                 ctx.lineTo((graphWidth / maxDataPoints)*(labels.length-1), height);
                 ctx.lineTo(0, height);
                 ctx.closePath();

@@ -33,7 +33,8 @@ namespace CoinTrading.Pages
         {
             if (HttpContext.Session.IsLogedin() || CheckCookieLoggedin()) 
             {
-                return RedirectToPage(GetRedirectPage(), new { text = $"Wellcome {HttpContext.Session.GetUsername()}" });
+                HttpContext.Session.SetPrimaryAlert($"Wellcome {HttpContext.Session.GetUsername()}");
+                return RedirectToPage(GetRedirectPage());
             }
 
             Message = text;
@@ -70,11 +71,13 @@ namespace CoinTrading.Pages
                     DB.SaveChanges();
                 }
 
+                HttpContext.Session.SetPrimaryAlert($"Wellcome {user.Username}!");
                 HttpContext.Session.LoginMe(user);
-                return RedirectToPage(GetRedirectPage(), new { text = $"Wellcome {user.Username}!" });
+                return RedirectToPage(GetRedirectPage());
             }
 
-            return RedirectToPage("./Login", new { text = "Wrong Username or Password" });
+            HttpContext.Session.SetDangerAlert("Wrong Username or Password!");
+            return RedirectToPage("./Login");
         }
 
         public string SetCookies(string username)

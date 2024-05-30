@@ -4,6 +4,7 @@
     ViewData["Title"] = "Profile";
 }
 <h1>@ViewData["Title"]</h1>
+@Html.Raw(HttpContext.Session.GetAlert())
 <h2>Ändra profiluppgifter</h2>
 <form method="post" id="profileForm">
     <div class="form-group">
