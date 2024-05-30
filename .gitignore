@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /CoinTrading/Data/sqlite3.exe
 /CoinTrading/Data/data.db
+/CoinTrading/Data/data1.db
