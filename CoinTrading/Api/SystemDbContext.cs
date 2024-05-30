@@ -11,6 +11,7 @@ namespace CoinTrading.Api
         public DbSet<Prices> Prices { get; set; }
         public DbSet<Positions> Positions { get; set; }
         public DbSet<Orders> Orders { get; set; }
+        public DbSet<OtherPrices> OtherPrices { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -21,7 +22,7 @@ namespace CoinTrading.Api
         {
             modelBuilder.Entity<Users>().ToTable("Users");
         }
- 
+
     }
 
     public class Users
@@ -34,11 +35,13 @@ namespace CoinTrading.Api
         public double Balance { get; set; }
 
         [NotMapped]
-        public CoinPairs[]? CoinBlances { 
-            get => coin_balances != null ? JsonSerializer.Deserialize<CoinPairs[]>(coin_balances) ?? default : default; 
-            set { 
-                if (value != null) coin_balances = JsonSerializer.Serialize(value); 
-            } 
+        public CoinPairs[]? CoinBlances
+        {
+            get => coin_balances != null ? JsonSerializer.Deserialize<CoinPairs[]>(coin_balances) ?? default : default;
+            set
+            {
+                if (value != null) coin_balances = JsonSerializer.Serialize(value);
+            }
         }
 
         public string? coin_balances { get; set; }
@@ -84,6 +87,13 @@ namespace CoinTrading.Api
 
         public string? Type { get; set; }
         public string? Side { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+    public class OtherPrices
+    {
+        public int Id { get; set; }
+        public string Symbol { get; set; }
+        public double Price { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

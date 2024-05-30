@@ -35,7 +35,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS orders
 conn.commit()
 
 
-# Detta fungerar troligen inte eftersom jag ändrat i tabellerna
+# Detta fungerar troligen inte eftersom jag andrat i tabellerna
 """ c.execute("INSERT INTO positions (symbol) VALUES ('BTCUSDT')")
 conn.commit()
 
