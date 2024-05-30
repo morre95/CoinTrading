@@ -202,7 +202,7 @@
                 const rect = canvas.getBoundingClientRect();
                 lastMouseY = event.clientY - rect.top;
                 lastMouseX = event.clientX - rect.left;
-                document.getElementById('myHoverPrice').style.top = `${lastMouseY + 160}px`
+                document.getElementById('myHoverPrice').style.top = `${event.clientY - rect.top}px`
                 document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
                 updateChart();
             });
@@ -344,21 +344,37 @@
 
                 // Draw the labels
                 ctx.fillStyle = '#000';
-                ctx.textAlign = 'center';
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'white';
+                let minutesAgo = Math.floor(labels.length/60);
                 labels.forEach((label, index) => {
                     if (index % 60 === 0 || index === labels.length - 1) { // Display label every 60 seconds or at the end
                         const x = (graphWidth / (labels.length - 1)) * index;
-                        const y = height + 20;
-                        ctx.fillText(label, x, y);
+                        const y = height - 20;
+                        if (minutesAgo === 0) {
+                            ctx.textAlign = 'right';
+                            ctx.fillText("now", x, y);
+                        }
+                        else if (minutesAgo === 1) {
+                            ctx.textAlign = 'center';
+                            ctx.fillText("1 minute ago", x, y);
+                        }
+                        else if (minutesAgo === Math.floor(labels.length/60)) {
+                            ctx.textAlign = 'left';
+                            ctx.fillText(minutesAgo+" minutes ago", x, y);
+                        }
+                        else {
+                            ctx.textAlign = 'center';
+                            ctx.fillText(minutesAgo+" minutes ago", x, y);
+                        }
+                        minutesAgo --;
+
+                        ctx.beginPath();
+                        ctx.moveTo(x, height);
+                        ctx.lineTo(x, height-10);
+                        ctx.stroke();
                     }
                 });
-
-                // Draw the X and Y axis
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(0, height);
-                ctx.lineTo(width, height);
-                ctx.stroke();
 
                 //draw lines and text on mouse
                 drawMouseTooltip();
