@@ -5,6 +5,13 @@ using System.Diagnostics;
 
 namespace CoinTrading.Pages.Position
 {
+    public class CoinPairs
+    {
+        public enum AvailablePair { btcusdt, unknown }
+        public AvailablePair Pair { get; set; }
+        public double Value { get; set; }
+    }
+
     public class OpenPositionModel : PageModel
     {
         public IActionResult OnGet()
@@ -15,6 +22,9 @@ namespace CoinTrading.Pages.Position
             Debug.WriteLine("double.TryParse(Request.Query[\"price\"]...): " + double.TryParse(Request.Query["price"].ToString().Replace('.', ','), out double price2));
             Debug.WriteLine("amount2: " + amount2);
             Debug.WriteLine("price2: " + price2);
+
+            
+
             if (double.TryParse(Request.Query["amount"].ToString().Replace('.', ','), out double amount) &&
                 double.TryParse(Request.Query["price"].ToString().Replace('.', ','), out double price) &&
                 int.TryParse(Request.Query["leverage"], out int leverage))
@@ -23,6 +33,8 @@ namespace CoinTrading.Pages.Position
                 string? type = Request.Query["type"];
 
                 double balance = HttpContext.Session.GetBalance();
+                CoinPairs[]? coinBalance = HttpContext.Session.GetCoinBalance();
+
 
                 Position pos = new();
                 if (side == "buy")
@@ -34,14 +46,21 @@ namespace CoinTrading.Pages.Position
                     pos.Sell(amount, price);
                 }
 
-                Debug.WriteLine("Pos value: " + pos.GetTotalValue());
+                Debug.WriteLine("Pos value: " + pos.GetBTCValue());
 
                 Debug.WriteLine($"Balance: {balance}");
-                Debug.WriteLine($"if(pos.GetTotalValue() <= balance): {pos.GetTotalValue() <= balance}");
-                if (pos.GetTotalValue() <= balance)
+                Debug.WriteLine($"if(pos.GetTotalValue() <= balance): {pos.GetBTCValue() <= balance}");
+                if (pos.GetBTCValue() <= balance)
                 {
-                    balance -= pos.GetTotalValue() * amount;
+                    balance -= amount;
+                    
                     HttpContext.Session.SetBalance(balance);
+
+                    if (coinBalance == null)
+                    {
+                        coinBalance = new CoinPairs[1];
+                        coinBalance[0] = new CoinPairs { Pair = CoinPairs.AvailablePair.btcusdt, Value = pos.GetBTCValue() };
+                    }
 
                     SystemDbContext db = new();
 
@@ -61,13 +80,14 @@ namespace CoinTrading.Pages.Position
                 }
                 else
                 {
-                    return new JsonResult(new { error = $"Balance not sufficient. Your balance: {balance}, Order value: {pos.GetTotalValue()}. Or you are not loged in" });
+                    return new JsonResult(new { error = $"Balance not sufficient. Your balance: {balance}, Order value: {pos.GetBTCValue()}. Or you are not loged in" });
                 }
 
                 object jsonData = new
                 {
-                    orderValue = pos.GetTotalValue(),
+                    orderValue = pos.GetBTCValue(),
                     pAndL = pos.GetFinalPAndL(),
+                    averageEntry = pos.GetAvgEntryPrice(),
                     price,
                     amount,
                     side,
@@ -93,40 +113,40 @@ namespace CoinTrading.Pages.Position
 
     public class Position
     {
-        private double Quantity { get; set; }
-        private double TotalValue { get; set; }
+        private double Amount { get; set; }
+        private double TotalBTCValue { get; set; }
         private double FinalPAndL { get; set; }
 
-        public double GetAvgEntryPrice() => Quantity / TotalValue;
-        public double GetTotalValue() => TotalValue;
-        public double GetQuantity() => Quantity;
+        public double GetAvgEntryPrice() => Amount / TotalBTCValue;
+        public double GetBTCValue() => TotalBTCValue;
+        public double GetQuantity() => Amount;
         public double GetPAndL(double price) => GetQuantity() * ((1 / GetAvgEntryPrice()) - (1 / price));
 
-        public void Buy(double quantity, double price)
+        public void Buy(double amount, double price)
         {
-            Quantity += quantity;
-            TotalValue += quantity / price;
+            Amount += amount;
+            TotalBTCValue += amount / price;
         }
 
-        public bool Sell(double quantity, double price)
+        public bool Sell(double amount, double price)
         {
-            if (quantity <= 0 || Quantity - quantity < 0)
+            if (amount <= 0 || Amount - amount < 0)
             {
                 return false;
             }
 
-            Quantity -= quantity;
-            TotalValue -= quantity / price;
+            Amount -= amount;
+            TotalBTCValue -= amount / price;
             return true;
         }
 
         public bool ClosePosition(double price)
         {
-            if (Quantity > 0)
+            if (Amount > 0)
             {
                 FinalPAndL = GetPAndL(price);
             }
-            return Sell(Quantity, price);
+            return Sell(Amount, price);
         }
 
         public double GetFinalPAndL()
