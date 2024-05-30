@@ -5,6 +5,13 @@ using System.Diagnostics;
 
 namespace CoinTrading.Pages.Position
 {
+    public class CoinPairs
+    {
+        public enum AvailablePair { btcusdt, unknown }
+        public AvailablePair Pair { get; set; }
+        public double Value { get; set; }
+    }
+
     public class OpenPositionModel : PageModel
     {
         public IActionResult OnGet()
@@ -15,6 +22,9 @@ namespace CoinTrading.Pages.Position
             Debug.WriteLine("double.TryParse(Request.Query[\"price\"]...): " + double.TryParse(Request.Query["price"].ToString().Replace('.', ','), out double price2));
             Debug.WriteLine("amount2: " + amount2);
             Debug.WriteLine("price2: " + price2);
+
+            
+
             if (double.TryParse(Request.Query["amount"].ToString().Replace('.', ','), out double amount) &&
                 double.TryParse(Request.Query["price"].ToString().Replace('.', ','), out double price) &&
                 int.TryParse(Request.Query["leverage"], out int leverage))
@@ -23,6 +33,8 @@ namespace CoinTrading.Pages.Position
                 string? type = Request.Query["type"];
 
                 double balance = HttpContext.Session.GetBalance();
+                CoinPairs[]? coinBalance = HttpContext.Session.GetCoinBalance();
+
 
                 Position pos = new();
                 if (side == "buy")
@@ -43,6 +55,12 @@ namespace CoinTrading.Pages.Position
                     balance -= amount;
                     
                     HttpContext.Session.SetBalance(balance);
+
+                    if (coinBalance == null)
+                    {
+                        coinBalance = new CoinPairs[1];
+                        coinBalance[0] = new CoinPairs { Pair = CoinPairs.AvailablePair.btcusdt, Value = pos.GetBTCValue() };
+                    }
 
                     SystemDbContext db = new();
 
