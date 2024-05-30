@@ -134,6 +134,7 @@
             const graphWidth = width;
             const graphHeight = height;
             let lastMouseY = 0;
+            let lastMouseX = 0;
             let currentPrice = 0;
             let labels = [];
             let data = [];
@@ -141,7 +142,7 @@
             let zoomOutAxisY = 0.75;
             let graphMinY = 0;
             let graphMaxY = 1;
-
+            let isMouseOnChart = false;
             let myPrice = 0;
 
             const maxDataPoints = 300; // Assuming 1 data point per second for 5 minutes
@@ -168,6 +169,17 @@
             };
             init();
 
+            document.getElementById("lineChart").addEventListener("mouseenter", function(  ) {
+                isMouseOnChart=true;
+                document.getElementById('myHoverPrice').style.visibility = 'visible';
+                updateChart();
+            });
+            document.getElementById("lineChart").addEventListener("mouseout", function(  ) {
+                isMouseOnChart=false;
+                document.getElementById('myHoverPrice').style.visibility = 'hidden';
+                updateChart();
+            });
+
             canvas.addEventListener('wheel', (event) => {
                 event.preventDefault(); 
                 zoomOutAxisY += event.deltaY*0.0005;
@@ -179,6 +191,7 @@
             canvas.addEventListener('mousemove', (event) => {
                 const rect = canvas.getBoundingClientRect();
                 lastMouseY = event.clientY - rect.top;
+                lastMouseX = event.clientX - rect.left;
                 document.getElementById('myHoverPrice').style.top = `${lastMouseY + 160}px`
                 document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
                 updateChart();
@@ -189,23 +202,40 @@
                 document.getElementById('price').value = myPrice
             });
 
-            function drawHorizontalLine() {
+            function drawMouseTooltip() {
+                if (!isMouseOnChart) return 0;
                 ctx.beginPath();
                 ctx.moveTo(0, lastMouseY);
                 ctx.lineTo(canvas.width, lastMouseY);
                 ctx.strokeStyle = 'white';
                 ctx.stroke();
                 
-                ctx.textAlign = 'right';
-                ctx.font = '21px Arial';
+                ctx.textAlign = 'center';
+                ctx.font = '23px Arial';
                 ctx.fillStyle = 'white';
                 let mousePrice = getPriceFromPixelY(lastMouseY);
+                let verticalOffset = -40;
+                let posY = getPixelFromPrice(getPriceFromPixelX(lastMouseX));
+
+                ctx.beginPath();
+                ctx.moveTo(lastMouseX, posY);
+                ctx.lineTo(lastMouseX, posY+verticalOffset);
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
+
                 myPrice = Number(mousePrice).toFixed(2)
+                ctx.fillText(myPrice, lastMouseX, posY+verticalOffset);
+
 
 
                 document.getElementById('myHoverPrice').innerText = myPrice
             }
 
+            function getPriceFromPixelX(pixelX) {
+                var i = Math.floor(pixelX*(maxDataPoints/graphWidth));
+                console.log( i);
+                return data[i];
+            }
             /*
              * översätter från en viss pixelkoordinat pixelY till ett pris som stämmer med den pixeln 
              */
@@ -265,25 +295,22 @@
                 updateGraphYRange();
                 ctx.clearRect(0, 0, width, height);
 
-                // Draw the X and Y axis
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(0, height);
-                ctx.lineTo(width, height);
-                ctx.stroke();
+
                 
 
                 // Create the gradient for the fill
                 const gradient = ctx.createLinearGradient(0, 0, 0, height);
-                gradient.addColorStop(0, 'rgba(25, 98, 139, 0.7)');
-                gradient.addColorStop(1, 'rgba(25, 98, 139, 0.0)');
+                //gradient.addColorStop(0, 'rgba(25, 98, 139, 0.5)');
+                gradient.addColorStop(0, 'rgba(41, 124, 179, 0.9)');
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7  )');
+                //gradient.addColorStop(1, 'rgba(13, 39, 56, 1.0  )');
 
 
                 function drawGraphValues() {
                     ctx.beginPath();
                     ctx.moveTo(0, getPixelFromPrice(data[0]) );
                     data.forEach((value, index) => {
-                        const x = (graphWidth / maxDataPoints) * index;
+                        const x = (graphWidth / maxDataPoints) * index+1;
                         const y = getPixelFromPrice(value);
                         ctx.lineTo(x, y);
                     });
@@ -292,7 +319,7 @@
                 // Draw the gradient fill
                 drawGraphValues()
                 ctx.lineWidth = 3 //thicker graph line
-                ctx.lineTo((graphWidth / maxDataPoints)*(labels.length-1), height);
+                ctx.lineTo((graphWidth / maxDataPoints)*(labels.length), height);
                 ctx.lineTo(0, height);
                 ctx.closePath();
                 ctx.fillStyle = gradient;
@@ -316,9 +343,18 @@
                     }
                 });
 
-                //draw mouse line
-                  drawHorizontalLine();
+                // Draw the X and Y axis
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, height);
+                ctx.lineTo(width, height);
+                ctx.stroke();
 
+                //draw lines and text on mouse
+                drawMouseTooltip();
+
+
+                  //upddate market order price
                  if (document.getElementById('marketType').value === "market") {
                     price.disabled = true
                     document.getElementById('price').value = currentPrice;
