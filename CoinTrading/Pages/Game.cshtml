@@ -131,8 +131,9 @@
 
             const width = canvas.width;
             const height = canvas.height;
-            const graphWidth = width;
+            const graphWidth = width-150;
             const graphHeight = height;
+            const graphStartHeight = 200;
             let lastMouseY = 0;
             let lastMouseX = 0;
             let currentPrice = 0;
@@ -226,9 +227,12 @@
                 myPrice = Number(mousePrice).toFixed(2)
                 ctx.fillText(myPrice, lastMouseX, posY+verticalOffset);
 
+                //document.getElementById('myHoverPrice').innerText = myPrice
 
-
-                document.getElementById('myHoverPrice').innerText = myPrice
+                
+                ctx.textAlign = 'right';
+                ctx.strokeStyle = 'white';
+                ctx.fillText(myPrice, graphWidth, lastMouseY);
             }
 
             function getPriceFromPixelX(pixelX) {
@@ -241,7 +245,7 @@
              */
             function getPriceFromPixelY(pixelY) {
                 var graphRange = graphMaxY-graphMinY;
-                var ratio = 1-pixelY/height
+                var ratio = 1-pixelY/graphHeight
                 return ratio*graphRange+graphMinY;
             }
 
@@ -251,7 +255,7 @@
             function getPixelFromPrice(price) {
                 var graphRange = graphMaxY-graphMinY;
                 var ratio = (price-graphMinY)/graphRange;
-                return  height - ratio*height;
+                return  height - ratio*graphHeight;
             }
 
              /*
@@ -299,7 +303,7 @@
                 
 
                 // Create the gradient for the fill
-                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                const gradient = ctx.createLinearGradient(0, 0, 0, graphHeight);
                 //gradient.addColorStop(0, 'rgba(25, 98, 139, 0.5)');
                 gradient.addColorStop(0, 'rgba(41, 124, 179, 0.9)');
                 gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7  )');
@@ -324,19 +328,19 @@
                 ctx.closePath();
                 ctx.fillStyle = gradient;
                 ctx.fill();
-
                 
                 // Draw the line on top of the gradient fill
                 drawGraphValues()
                 ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
                 ctx.stroke();
-                
 
-                // Draw the labels
+                // Draw the x axis labels
                 ctx.fillStyle = '#000';
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'white';
-                let minutesAgo = Math.floor(labels.length/60);
+                ctx.font = '19px Arial';
+                let indexNow = Math.floor(labels.length/60);
+                let minutesAgo = indexNow;
                 labels.forEach((label, index) => {
                     if (index % 60 === 0 || index === labels.length - 1) { // Display label every 60 seconds or at the end
                         const x = (graphWidth / (labels.length - 1)) * index;
@@ -347,15 +351,15 @@
                         }
                         else if (minutesAgo === 1) {
                             ctx.textAlign = 'center';
-                            ctx.fillText("1 minute ago", x, y);
+                            ctx.fillText("1 min ago", x, y);
                         }
-                        else if (minutesAgo === Math.floor(labels.length/60)) {
+                        else if (minutesAgo === indexNow) {
                             ctx.textAlign = 'left';
-                            ctx.fillText(minutesAgo+" minutes ago", x, y);
+                            ctx.fillText(minutesAgo+" min ago", x, y);
                         }
                         else {
                             ctx.textAlign = 'center';
-                            ctx.fillText(minutesAgo+" minutes ago", x, y);
+                            ctx.fillText(minutesAgo+" min ago", x, y);
                         }
                         minutesAgo --;
 
@@ -365,6 +369,30 @@
                         ctx.stroke();
                     }
                 });
+                
+
+                // Draw the y axis labels
+                numOfLabels = 10;
+
+                ctx.beginPath();
+                ctx.moveTo(graphWidth, 0);
+                ctx.lineTo(graphWidth, graphHeight);
+                ctx.stroke();
+
+                ctx.font = '19px Arial';
+                ctx.textAlign = 'left';
+                for (let i = 1 ; i<numOfLabels ; i++) {
+                        ctx.beginPath();
+                        let y = graphHeight-i*(graphHeight/numOfLabels)
+                        let x = graphWidth;
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x+10, y);
+                        ctx.stroke();
+                        let price = getPriceFromPixelY(y);
+                        
+                        ctx.fillText(Number(price).toFixed(2), x+20, y);
+                }
+
 
                 //draw lines and text on mouse
                 drawMouseTooltip();
@@ -378,6 +406,9 @@
                     price.disabled = false
                 }
                 };
+
+
+
             // Fetch new data every second
             setInterval(fetchCoinData, 1000);
         });
