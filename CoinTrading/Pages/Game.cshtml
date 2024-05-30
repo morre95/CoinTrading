@@ -30,6 +30,8 @@
     .trade-form .buysell-buttons {
         display: flex;
         align-items: flex-end;
+        padding: 10px;
+        
     }
 
     #myHoverPrice {
@@ -56,9 +58,17 @@
         background-color: #0D2738;
         background-size: cover;
     }
+    .game
+    {
+     width: 1200px;
+        background-color: #333333;
+     padding-bottom: 20px;
+     padding-top: 20px;
+    }
 </style>
+<div class="game">
 <div class="text-center">
-    <h1 id="priceText" class="display-4">Live Coin Price</h1>
+    @* <h1 id="priceText" class="display-4">Live Coin Price</h1> *@
    
     @Html.Raw(HttpContext.Session.GetAlert())
 
@@ -121,7 +131,7 @@
     }
 
 </div>
-
+</div>
 @section Scripts {
     <script>
 
