@@ -1,8 +1,5 @@
 using CoinTrading.Api;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace CoinTrading.Pages
 {
@@ -10,6 +7,7 @@ namespace CoinTrading.Pages
     {
         public string? Message { get; set; }
         private readonly ILogger<IndexModel> _logger;
+        private readonly SystemDbContext _db;
 
         public IndexModel(ILogger<IndexModel> logger)
         {
@@ -24,12 +22,13 @@ namespace CoinTrading.Pages
             double balance = HttpContext.Session.GetBalance();
 
             if (username != null)
-            { 
+            {
                 ViewData["Username"] = username;
                 ViewData["Balance"] = balance;
             }
         }
+
     }
 
-    
+
 }

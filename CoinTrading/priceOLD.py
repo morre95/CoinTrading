@@ -11,7 +11,11 @@ print(db_path)
 conn = sqlite3.connect(db_path)
 c = conn.cursor()
 
-# Skapa en tabell för btcusdt om den inte redan finns
+
+#c.execute('DROP TABLE prices')
+conn.commit()
+
+# Skapa en tabell om den inte redan finns
 c.execute('''CREATE TABLE IF NOT EXISTS prices
              (id INTEGER PRIMARY KEY AUTOINCREMENT,
               symbol TEXT, 
@@ -19,14 +23,6 @@ c.execute('''CREATE TABLE IF NOT EXISTS prices
               close_price REAL, 
               high_price REAL, 
               low_price REAL, 
-              timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
-conn.commit()
-
-# Skapa en tabell för andra priser om den inte redan finns
-c.execute('''CREATE TABLE IF NOT EXISTS other_prices
-             (id INTEGER PRIMARY KEY AUTOINCREMENT,
-              symbol TEXT, 
-              price REAL, 
               timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 conn.commit()
 
@@ -53,42 +49,10 @@ async def get_binance_price(symbol):
 
             await asyncio.sleep(1)
 
-async def get_other_prices(symbol):
-    uri = f"wss://stream.binance.com:9443/ws/{symbol.lower()}@trade"
-
-    async with websockets.connect(uri) as websocket:
-        while True:
-            response = await websocket.recv()
-            data = json.loads(response)
-            price = float(data['p'])
-            print(f"Trade executed [{symbol.upper()}] price: {price}")
-
-            # Spara priset i databasen
-            c.execute("INSERT INTO other_prices (symbol, price) VALUES (?, ?)", 
-                      (symbol.upper(), price))
-            conn.commit()
-
-            c.execute("DELETE FROM other_prices WHERE timestamp < DATETIME('now', '-400 seconds')")
-            conn.commit()
-
-            await asyncio.sleep(1)
-
-async def main():
-    symbol = "btcusdt"
-    symbols = [
-        "ethbtc", "bnbbtc", "kcsbtc", "crobtc", 
-        "adabtc", "renbtc", "dotbtc", "unibtc", 
-        "linkbtc", "linkusdt", "adausdt", "uniusdt"
-    ]
-
-    btc_task = asyncio.create_task(get_binance_price(symbol))
-    other_tasks = [asyncio.create_task(get_other_prices(sym)) for sym in symbols]
-
-    await asyncio.gather(btc_task, *other_tasks)
-
 if __name__ == "__main__":
+    symbol = "btcusdt"
     try:
-        asyncio.get_event_loop().run_until_complete(main())
+        asyncio.get_event_loop().run_until_complete(get_binance_price(symbol))
     except KeyboardInterrupt:
         pass
     finally:

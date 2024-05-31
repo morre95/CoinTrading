@@ -96,6 +96,12 @@ namespace CoinTrading
             session.SetBalance(user.Balance);
             session.SetUserId(user.Id);
             session.SetBool("logedin", true);
+
+            if (user.CoinBlances != null) 
+            {
+                session.SetCoinBalance(user.CoinBlances);
+            }
+            
         }
 
         public static void LogoutMe(this ISession session)

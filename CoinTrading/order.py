@@ -25,7 +25,8 @@ c.execute('''CREATE TABLE IF NOT EXISTS orders
             id           INTEGER    PRIMARY KEY AUTOINCREMENT,
             positionid   INTEGER, 
             open_price   REAL       DEFAULT 0.00, 
-            close_price  REAL       DEFAULT 0.00,
+            close_price  REAL,
+            amount       REAL,
             type         TEXT,
             side         TEXT,
             timestamp    DATETIME   DEFAULT CURRENT_TIMESTAMP,
@@ -34,6 +35,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS orders
 conn.commit()
 
 
+# Detta fungerar troligen inte eftersom jag andrat i tabellerna
 """ c.execute("INSERT INTO positions (symbol) VALUES ('BTCUSDT')")
 conn.commit()
 
