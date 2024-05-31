@@ -14,23 +14,102 @@
 @Html.Raw(HttpContext.Session.GetAlert())
 
 <style>
-    body{
-        background-image: url('Images/bg.jpg'); 
-        background-size: cover; 
-        background-position: center; 
-        background-repeat: no-repeat; 
+    body {
+        background-image: url('Images/bg.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    table#priceTable td.positive-change {
+        color: green;
+        
+    }
+
+    table#priceTable td.negative-change {
+        color: red;
+       
+    }
+
+    .coin-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
     }
 </style>
 <div class="text-center">
     <h1 class="display-4">CoinTrade</h1>
     <h3>Trade your coins and become a millionaire!</h3>
-    <div id="prices-container">
-        <!-- Coin prices will be displayed here -->
-    </div>
+    <table id="priceTable" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Coin</th>
+                <th>Price $</th>
+                <th>24h Change</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be added here by JavaScript -->
+        </tbody>
+    </table>
 </div>
 
 @section Scripts {
+    @Html.Raw(@"
     <script>
+        const coins = [
+            { symbol: 'btcusdt', name: 'BTC', icon: 'Images/btclogo.png' },
+            { symbol: 'ethusdt', name: 'ETH', icon: 'Images/eth.png' },
+            { symbol: 'bnbusdt', name: 'BNB', icon: 'Images/bnb.png' },
+            { symbol: 'xrpusdt', name: 'XRP', icon: 'Images/xrp.png' },
+            { symbol: 'dogeusdt', name: 'DOGE', icon: 'Images/doge.png' },
+            { symbol: 'shibusdt', name: 'SHIBA INU', icon: 'Images/shiba.png' },
+            // Add other coins as needed
+        ];
 
+        const symbols = coins.map(coin => coin.symbol);
+        const ws = new WebSocket('wss://stream.binance.com:9443/ws');
+
+        ws.onopen = () => {
+            const params = symbols.map(symbol => `${symbol}@ticker`);
+            const subscribeMessage = {
+                method: 'SUBSCRIBE',
+                params: params,
+                id: 1
+            };
+            ws.send(JSON.stringify(subscribeMessage));
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            updateTable(data);
+        };
+
+        const updateTable = (data) => {
+            const coin = coins.find(c => c.symbol.toLowerCase() === data.s.toLowerCase());
+            if (!coin) return;
+
+            const table = document.getElementById('priceTable').getElementsByTagName('tbody')[0];
+            let row = document.getElementById(data.s);
+
+            if (!row) {
+                row = table.insertRow();
+                row.id = data.s;
+
+                const cellCoin = row.insertCell(0);
+                const cellPrice = row.insertCell(1);
+                const cellChange = row.insertCell(2);
+
+                cellCoin.innerHTML = `<img src='${coin.icon}' class='coin-icon' alt='${coin.name}'/>${coin.name}`;
+                cellPrice.innerHTML = parseFloat(data.c).toFixed(4);
+                cellChange.innerHTML = `${parseFloat(data.P).toFixed(4)}%`;
+                cellChange.className = parseFloat(data.P) >= 0 ? 'positive-change' : 'negative-change';
+            } else {
+                row.cells[1].innerHTML = parseFloat(data.c).toFixed(4);
+                row.cells[2].innerHTML = `${parseFloat(data.P).toFixed(4)}%`;
+                row.cells[2].className = parseFloat(data.P) >= 0 ? 'positive-change' : 'negative-change';
+            }
+        };
     </script>
+    ")
 }
