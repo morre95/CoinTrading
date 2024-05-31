@@ -98,6 +98,10 @@
     .nav-tabs .nav-item .nav-link.active#buy-tab {
         color: #84da53;
     }
+
+    .btn-space {
+        margin-right: 5px;
+    }
 </style>
 <div class="game">
     <div class="text-center">
@@ -115,6 +119,7 @@
         <!-- Chart -->
         <canvas id="lineChart" width="1200" height="800" style="border:1px solid #000; background-color: #0D2738;"></canvas>
 
+        <div id="alert-placeholder"></div>
 
         <!-- Nav tabs -->
         <ul class="nav nav-tabs justify-content-end" id="myTab" role="tablist">
@@ -231,8 +236,10 @@
 
                     <!-- Sell Button -->
                     <div class="buysell-buttons">
-                        <button class="btn btn-danger sell-btn" @(!Model.IsLoegin ? "disabled" : "")>Sell</button>
+                        <button class="btn btn-danger sell-btn btn-space" @(!Model.IsLoegin ? "disabled" : "")>Sell</button>
+                        <button class="btn btn-warning btn-space" id="close-position" @(!Model.IsLoegin ? "disabled" : "")>Close</button>
                     </div>
+ 
                 </div>
             </div>
         </div>
@@ -247,7 +254,6 @@
             $(this).tab('show')
         })
 
-        
         const canvas = document.getElementById('lineChart');
         const ctx = canvas.getContext('2d');
 
@@ -631,6 +637,17 @@
         const sellOrderValue = document.getElementById('sell-orderValue')
         const sellMarketType = document.getElementById('sell-marketType')
 
+
+        function showAlert(message, alerttype = 'info') {
+            $('#alert-placeholder').append(`<div id="alertdiv" class="alert alert-${alerttype}" role="alert">${message}</div>`)
+            setTimeout(function () {
+                $('#alert-placeholder').addClass('fade-out')
+                setTimeout(function () {
+                    $("#alertdiv").remove();
+                }, 0.8);
+            }, 2000);
+        }
+
         function urlBuilder(base, parmas) {
             let buildUrl = function (base, key, value) {
                 let sep = (base.indexOf('?') > -1) ? '&' : '?';
@@ -683,6 +700,9 @@
                     document.getElementById('orderValue').innerHTML = `$${data.orderValue.toFixed(8)}`
                     document.getElementById('pAndl').innerHTML = `$${data.pAndL.toFixed(8)}`
                     console.log(data)
+
+                    let msg = side === 'buy' ? `You yust bought ${data.orderValue.toFixed(8)}&#8383;` : `You just sold ${data.orderValue.toFixed(8)}&#8383;`
+                    showAlert(msg)
                 }
             })
         }
@@ -704,6 +724,19 @@
             console.log(side + " order")
 
             sendOrder(side, sellAmount, sellPrice,sellLeverage, sellMarketType)
+        })
+
+        document.getElementById('close-position').addEventListener('click', (event) => {
+            event.preventDefault()
+            $.getJSON('Position/ClosePosition', (data) => {
+                if (Object.hasOwn(data, 'error')) {
+                    alert(data['error'])
+                    return 
+                }
+
+
+
+            })
         })
 
         setInterval(() => {

@@ -7,10 +7,10 @@ namespace CoinTrading
         public static void SetAlert(this ISession session, string message, string type = "primary")
         {
             session.SetString("bootstrapAlert", 
-                "<style>" +
+                /*"<style>" +
                 ".fade-out { animation: fade-out 0.7s ease-out forwards; }" +
                 "@keyframes fade-out { 0% { opacity: 1; display: block; } 100% { opacity: 0; display: none; } }" +
-                "</style>" +
+                "</style>" +*/
                 $"<div class=\"alert alert-{type} justify-content-between\" role=\"alert\">" +
                 $"{message}" +
                 "<button type=\"button\" class=\"close btn-close float-end\" aria-label=\"Close\">" +
