@@ -47,7 +47,7 @@ class Manager:
                 retries = 0
 
     async def subscribe(self, websocket):
-        info = {"method": "SUBSCRIBE", "params": ["btcusdt@aggTrade"], "id": 1}
+        info = {"method": "SUBSCRIBE", "params": ["btcusdt@miniTicker"], "id": 1}
         message = json.dumps(info)
         await websocket.send(message)
     
