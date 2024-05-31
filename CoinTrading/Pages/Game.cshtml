@@ -683,7 +683,7 @@
                 console.log(data)
                 if (Object.hasOwn(data, 'error')) { return }
 
-                let pAndL = data.sumAmount * ((1 / data.avgPrice - (1 / myPrice))).toFixed(8)
+                let pAndL = data.sumAmount * ((1 / data.avgPrice - (1 / currentPrice))).toFixed(8)
                 let el = document.getElementById('pAndl')
                 el.innerHTML = pAndL + "&#8383;"
 
