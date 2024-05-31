@@ -69,7 +69,7 @@
 
     .trade-form-overlay {
         position: absolute;
-        top: -25px;
+        top: -68px;
         left: 0;
         width: 100%;
         height: 100%;
@@ -77,7 +77,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-bottom: 107px;
+        padding-bottom: 150px;
         z-index: 10;
     }
 
@@ -85,7 +85,7 @@
         color: white;
         font-size: 1.5em;
         text-decoration: none;
-        margin-top: 105px;
+        margin-top: 155px;
         background: rgba(255, 0, 0, 0.8);
         padding: 10px 20px;
         border-radius: 5px;
@@ -126,7 +126,7 @@
             </li>
         </ul>
 
-        <!-- Tab panes -->
+        <!-- Tab pane -->
         <div class="tab-content">
             <!-- Buy tabs -->
             <div class="tab-pane active" id="buy" role="tabpanel" aria-labelledby="buy-tab">
@@ -139,7 +139,7 @@
                         <input type="hidden" id="price">
                         <input type="hidden" id="marketType">
                     }
-                    <!-- Order Type -->
+                    <!-- Buy Order Type -->
                     <div class="form-group">
                         <label for="marketType">Order Type</label>
                         <select id="marketType" name="marketType" class="form-control" @(!Model.IsLoegin ? "disabled" : "")>
@@ -148,7 +148,7 @@
                         </select>
                     </div>
 
-                    <!-- Leverage -->
+                    <!-- Buy Leverage -->
                     <div class="form-group">
                         <label for="leverage">Leverage</label>
                         <select id="leverage" name="leverage" class="form-control" disabled>
@@ -167,24 +167,25 @@
                         </select>
                     </div>
 
-                    <!-- Price -->
+                    <!-- Buy Price -->
                     <div class="form-group">
                         <label for="price">Price</label>
                         <input type="number" step="0.01" id="price" name="price" class="form-control" placeholder="Price" @(!Model.IsLoegin ? "disabled" : "")>
                     </div>
 
-                    <!-- Amount -->
+                    <!-- Buy Amount -->
                     <div class="form-group">
                         <label for="amount">Amount</label> <small id="total-value"></small>
                         <input type="text" id="amount" name="amount" class="form-control" placeholder="Amount" @(!Model.IsLoegin ? "disabled" : "")>
                     </div>
 
-                    <!-- Buy/Sell Buttons -->
+                    <!-- Buy Button -->
                     <div class="buysell-buttons">
-                        <button class="btn btn-primary buy-sell-btn" @(!Model.IsLoegin ? "disabled" : "")> Buy</button>
+                        <button class="btn btn-success buy-sell-btn" @(!Model.IsLoegin ? "disabled" : "")>Buy</button>
                     </div>
                 </div>
             </div>
+            <!-- Sell pane -->
             <div class="tab-pane" id="sell" role="tabpanel" aria-labelledby="sell-tab">
                 <div class="trade-form">
                     @if (!Model.IsLoegin)
@@ -195,19 +196,19 @@
                         <input type="hidden" id="price">
                         <input type="hidden" id="marketType">
                     }
-                    <!-- Order Type -->
+                    <!-- Sell Order Type -->
                     <div class="form-group">
-                        <label for="marketType">Order Type</label>
-                        <select id="marketType" name="marketType" class="form-control" @(!Model.IsLoegin ? "disabled" : "")>
+                        <label for="sell-marketType">Order Type</label>
+                        <select id="sell-marketType" name="sell-marketType" class="form-control" @(!Model.IsLoegin ? "disabled" : "")>
                             <option value="market">Market</option>
                             <option value="limit">Limit</option>
                         </select>
                     </div>
 
-                    <!-- Leverage -->
+                    <!-- Sell Leverage -->
                     <div class="form-group">
-                        <label for="leverage">Leverage</label>
-                        <select id="leverage" name="leverage" class="form-control" disabled>
+                        <label for="sell-leverage">Leverage</label>
+                        <select id="sell-leverage" name="sell-leverage" class="form-control" disabled>
                             <!-- TODO: lägg till disabled ifstatsen när det är dagst att köra med leverage skarpt -->
                             @for (int i = 1; i <= 100; i++)
                             {
@@ -223,19 +224,19 @@
                         </select>
                     </div>
 
-                    <!-- Price -->
+                    <!-- Sell Price -->
                     <div class="form-group">
-                        <label for="price">Price</label>
-                        <input type="number" step="0.01" id="price" name="price" class="form-control" placeholder="Price" @(!Model.IsLoegin ? "disabled" : "")>
+                        <label for="sell-price">Price</label>
+                        <input type="number" step="0.01" id="sell-price" name="sell-price" class="form-control" placeholder="Price" @(!Model.IsLoegin ? "disabled" : "")>
                     </div>
 
-                    <!-- Amount -->
+                    <!-- Sell Amount -->
                     <div class="form-group">
-                        <label for="amount">Amount</label> <small id="total-value"></small>
-                        <input type="text" id="amount" name="amount" class="form-control" placeholder="Amount" @(!Model.IsLoegin ? "disabled" : "")>
+                        <label for="sell-amount">Amount</label> <small id="total-value"></small>
+                        <input type="text" id="sell-amount" name="sell-amount" class="form-control" placeholder="Amount" @(!Model.IsLoegin ? "disabled" : "")>
                     </div>
 
-                    <!-- Buy/Sell Buttons -->
+                    <!-- Sell Button -->
                     <div class="buysell-buttons">
                         <button class="btn btn-danger buy-sell-btn" @(!Model.IsLoegin ? "disabled" : "")>Sell</button>
                     </div>
@@ -251,379 +252,371 @@
         $('#myTab a').on('click', function (e) {
             e.preventDefault()
             $(this).tab('show')
-            //e.target.
         })
 
-        /*const tabEl = $('button[data-bs-toggle="tab"]')
-        tabEl.addEventListener('shown.bs.tab', function (event) {
-            event.target // newly activated tab
-            event.relatedTarget // previous active tab
-        })*/
+        
+        const canvas = document.getElementById('lineChart');
+        const ctx = canvas.getContext('2d');
 
-        document.addEventListener("DOMContentLoaded", function () { // detta event kan städas bort
-            const canvas = document.getElementById('lineChart');
-            const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const graphWidth = width-150;
+        const graphStartHeight = 30;
+        const graphHeight = height-graphStartHeight;
+        let lastMouseY = 0;
+        let lastMouseX = 0;
+        let currentPrice = 0;
+        let labels = [];
+        let data = [];
 
-            const width = canvas.width;
-            const height = canvas.height;
-            const graphWidth = width-150;
-            const graphStartHeight = 30;
-            const graphHeight = height-graphStartHeight;
-            let lastMouseY = 0;
-            let lastMouseX = 0;
-            let currentPrice = 0;
-            let labels = [];
-            let data = [];
+        let limitOrders = [];
+        //lägger till påhittade data för att testa bara
+        limitOrders.push(68000.0);
+        limitOrders.push(69000.0);
 
-            let limitOrders = [];
-            //lägger till påhittade data för att testa bara
-            limitOrders.push(68000.0);
-            limitOrders.push(69000.0);
+        let zoomOutAxisY = 0.75;
+        let graphMinY = 0;
+        let graphMaxY = 1;
+        let isMouseOnChart = false;
+        let myPrice = 0;
 
-            let zoomOutAxisY = 0.75;
-            let graphMinY = 0;
-            let graphMaxY = 1;
-            let isMouseOnChart = false;
-            let myPrice = 0;
-
-            const maxDataPoints = 300; // Assuming 1 data point per second for 5 minutes
+        const maxDataPoints = 300; // Assuming 1 data point per second for 5 minutes
 
 
-            // first load in old stored data to catch up
-            const init = async () => {
-                try {
-                    const response = await fetch('@Url.Page("prices")');
-                    const result = await response.json();
+        // first load in old stored data to catch up
+        const init = async () => {
+            try {
+                const response = await fetch('@Url.Page("prices")');
+                const result = await response.json();
 
-                    for(let i = 0 ; i < result.prices.length; i++) {
-                        var price = result.prices[i].close_price;
-                        var timestamp = parseTimestamp( result.prices[i].timestamp);
-                        data.push(price);
-                        labels.push(timestamp);
-                    }
-                   
-                } catch (error) {
-                    console.error('Error fetching coin data:', error);
-                }
-            };
-            init();
-
-            document.getElementById("lineChart").addEventListener("mouseenter", function(  ) {
-                isMouseOnChart=true;
-                document.getElementById('myHoverPrice').style.visibility = 'visible';
-                updateChart();
-            });
-            document.getElementById("lineChart").addEventListener("mouseout", function(  ) {
-                isMouseOnChart=false;
-                document.getElementById('myHoverPrice').style.visibility = 'hidden';
-                updateChart();
-            });
-
-            canvas.addEventListener('wheel', (event) => {
-                event.preventDefault(); 
-                zoomOutAxisY += event.deltaY*0.0005;
-                if (zoomOutAxisY <0 ) zoomOutAxisY = 0;
-
-                updateChart();
-            });
-
-            canvas.addEventListener('mousemove', (event) => {
-                const rect = canvas.getBoundingClientRect();
-                lastMouseY = event.clientY - rect.top;
-                lastMouseX = event.clientX - rect.left;
-                document.getElementById('myHoverPrice').style.top = `${event.clientY - rect.top}px`
-                document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
-                updateChart();
-            });
-
-            // Erik la till en klick funktion också
-            canvas.addEventListener('click', () => {
-                document.getElementById('price').value = myPrice                
-            });
-
-            function parseTimestamp(timestamp) {
-                // Split the timestamp into date and time components
-                const [datePart, timePart] = timestamp.split(' ');
-    
-                // Split the date and time into their individual components
-                const [year, month, day] = datePart.split('-').map(Number);
-                const [hours, minutes, seconds] = timePart.split(':').map(Number);
-    
-                // Create and return a new Date object in UTC
-                return new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
-            }
-
-            function calculateDifferenceInSeconds(timestamp1, timestamp2) {
-    
-                // Calculate the difference in milliseconds
-                const differenceInMilliseconds = timestamp1 - timestamp2;
-    
-                // Convert the difference to seconds
-                const differenceInSeconds = differenceInMilliseconds / 1000;
-    
-                return Math.floor(differenceInSeconds);
-            }
-            function drawMouseTooltip() {
-                if (!isMouseOnChart) return 0;
-                ctx.beginPath();
-                ctx.moveTo(0, lastMouseY);
-                ctx.lineTo(graphWidth, lastMouseY);
-                ctx.strokeStyle = 'white';
-                ctx.stroke();
-                
-                ctx.textAlign = 'center';
-                ctx.font = '23px Arial';
-                ctx.fillStyle = 'white';
-                let verticalOffset = -40;
-                let posY = getPixelFromPrice(getPriceFromPixelX(lastMouseX));
-                let mousePrice = getPriceFromPixelY(lastMouseY);
-
-                ctx.beginPath();
-                ctx.moveTo(lastMouseX, posY);
-                ctx.lineTo(lastMouseX, posY+verticalOffset);
-                ctx.strokeStyle = 'white';
-                ctx.stroke();
-
-                myPrice = Number(mousePrice).toFixed(2)
-                ctx.fillText(getPriceFromPixelX(lastMouseX), lastMouseX, posY+verticalOffset);
-                
-                ctx.textAlign = 'right';
-                ctx.strokeStyle = 'white';
-                ctx.fillText(myPrice, graphWidth, lastMouseY);
-            }
-
-            function getPriceFromPixelX(pixelX) {
-                var secondsAgo = Math.floor((graphWidth-pixelX)*(maxDataPoints/graphWidth));
-                // dålig lösning att loopa igenom allt för att kolla men......
-                var bestMatch = data[0];
-                var bestDiff = 999999999;
-                for (let i = 0 ; i < data.length ; i++) {
-                    var diff = Math.abs(secondsAgo - calculateDifferenceInSeconds(new Date(), labels[i]));
-                    if (diff < bestDiff) {
-                        bestMatch = data[i];
-                        bestDiff = diff;
-                    }
-                }
-                return bestMatch;
-            }
-            /*
-             * översätter från en viss pixelkoordinat pixelY till ett pris som stämmer med den pixeln 
-             */
-            function getPriceFromPixelY(pixelY) {
-                var graphRange = graphMaxY-graphMinY;
-                var ratio = 1-pixelY/graphHeight
-                return ratio*graphRange+graphMinY;
-            }
-
-             /*
-             * översätter från ett pris price till en pixelkoordinat som stämmer med det priset
-             */
-            function getPixelFromPrice(price) {
-                var graphRange = graphMaxY-graphMinY;
-                var ratio = (price-graphMinY)/graphRange;
-                return  graphHeight - ratio*graphHeight;
-            }
-
-             /*
-             * uppdaterar höjden på grafjäveln så att den alltid rymmer alla priser som finns i data.
-             */
-            function updateGraphYRange() {
-                let maxValue = Math.max(...data);
-                let minValue = Math.min(...data);
-                let priceRange = maxValue-minValue;
-                let graphExtend = priceRange*Math.pow(zoomOutAxisY, 4);
-
-
-                graphMinY = minValue-graphExtend;
-                graphMaxY = maxValue+graphExtend;
-            }
-
-            function fromTimestampToPixelX(timestamp) {
-                var now = new Date();
-                var secondsAgo = calculateDifferenceInSeconds(now, timestamp);
-                var x = graphWidth - secondsAgo*(graphWidth/maxDataPoints);
-                return x;
-            }
-
-            const fetchCoinData = async () => {
-                try {
-                    const response = await fetch('@Url.Page("latestprice")');
-                    const result = await response.json();
-                    currentPrice = result.price.close_price;
-                    var timestamp =parseTimestamp( result.price.timestamp);
-
-                    // Update labels and data
-                    while (labels.length >= maxDataPoints+2 ||
-                        calculateDifferenceInSeconds(new Date(), labels[0]) > maxDataPoints+2) {
-                        labels.shift();
-                        data.shift();
-
-                        if (labels.length <= 0) break;
-                    }
-
-
-                    data.push(currentPrice);
+                for(let i = 0 ; i < result.prices.length; i++) {
+                    var price = result.prices[i].close_price;
+                    var timestamp = parseTimestamp( result.prices[i].timestamp);
+                    data.push(price);
                     labels.push(timestamp);
-                    updateChart();   
-                } catch (error) {
-                    console.error('Error fetching coin data:', error);
                 }
-            };
+                   
+            } catch (error) {
+                console.error('Error fetching coin data:', error);
+            }
+        };
+        init();
 
-            const updateChart = () => {
-                // Clear canvas
-                updateGraphYRange();
-                ctx.clearRect(0, 0, width, height);
+        document.getElementById("lineChart").addEventListener("mouseenter", function(  ) {
+            isMouseOnChart=true;
+            document.getElementById('myHoverPrice').style.visibility = 'visible';
+            updateChart();
+        });
+        document.getElementById("lineChart").addEventListener("mouseout", function(  ) {
+            isMouseOnChart=false;
+            document.getElementById('myHoverPrice').style.visibility = 'hidden';
+            updateChart();
+        });
 
-                // Create the gradient for the fill
-                const gradient = ctx.createLinearGradient(0, 0, 0, graphHeight);
-                //gradient.addColorStop(0, 'rgba(25, 98, 139, 0.5)');
-                gradient.addColorStop(0, 'rgba(41, 124, 179, 0.9)');
-                gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7  )');
-                //gradient.addColorStop(1, 'rgba(13, 39, 56, 1.0  )');
+        canvas.addEventListener('wheel', (event) => {
+            event.preventDefault(); 
+            zoomOutAxisY += event.deltaY*0.0005;
+            if (zoomOutAxisY <0 ) zoomOutAxisY = 0;
 
+            updateChart();
+        });
 
-                function drawGraphValues() {
-                    for (let i = 0 ; i<data.length ; i++) {
-                        ctx.beginPath();
-                        ctx.moveTo(fromTimestampToPixelX(labels[i-1]), getPixelFromPrice(data[i-1]) );
-                        const x = fromTimestampToPixelX(labels[i]);
-                        const y = getPixelFromPrice(data[i]);
-                        
-                            console.log(calculateDifferenceInSeconds(labels[i], labels[i-1]));
-                        if (calculateDifferenceInSeconds(labels[i], labels[i-1]) > 2) {
-                            ctx.strokeStyle = 'rgba(75, 75, 75, 1)';
-                        } else {
-                            ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
-                        }
+        canvas.addEventListener('mousemove', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            lastMouseY = event.clientY - rect.top;
+            lastMouseX = event.clientX - rect.left;
+            document.getElementById('myHoverPrice').style.top = `${event.clientY - rect.top}px`
+            document.getElementById('myHoverPrice').style.left = `${rect.left + rect.width + 4}px`
+            updateChart();
+        });
 
-                        ctx.lineTo(x, y);
-                        ctx.stroke();
-                    }
-                }
+        // Erik la till en klick funktion också
+        canvas.addEventListener('click', () => {
+            document.getElementById('price').value = myPrice                
+        });
+
+        function parseTimestamp(timestamp) {
+            // Split the timestamp into date and time components
+            const [datePart, timePart] = timestamp.split(' ');
+    
+            // Split the date and time into their individual components
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hours, minutes, seconds] = timePart.split(':').map(Number);
+    
+            // Create and return a new Date object in UTC
+            return new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
+        }
+
+        function calculateDifferenceInSeconds(timestamp1, timestamp2) {
+    
+            // Calculate the difference in milliseconds
+            const differenceInMilliseconds = timestamp1 - timestamp2;
+    
+            // Convert the difference to seconds
+            const differenceInSeconds = differenceInMilliseconds / 1000;
+    
+            return Math.floor(differenceInSeconds);
+        }
+        function drawMouseTooltip() {
+            if (!isMouseOnChart) return 0;
+            ctx.beginPath();
+            ctx.moveTo(0, lastMouseY);
+            ctx.lineTo(graphWidth, lastMouseY);
+            ctx.strokeStyle = 'white';
+            ctx.stroke();
                 
-                // Draw the gradient fill
-                ctx.beginPath();
-                ctx.moveTo(fromTimestampToPixelX(labels[0]), getPixelFromPrice(data[0]) );
+            ctx.textAlign = 'center';
+            ctx.font = '23px Arial';
+            ctx.fillStyle = 'white';
+            let verticalOffset = -40;
+            let posY = getPixelFromPrice(getPriceFromPixelX(lastMouseX));
+            let mousePrice = getPriceFromPixelY(lastMouseY);
+
+            ctx.beginPath();
+            ctx.moveTo(lastMouseX, posY);
+            ctx.lineTo(lastMouseX, posY+verticalOffset);
+            ctx.strokeStyle = 'white';
+            ctx.stroke();
+
+            myPrice = Number(mousePrice).toFixed(2)
+            ctx.fillText(getPriceFromPixelX(lastMouseX), lastMouseX, posY+verticalOffset);
+                
+            ctx.textAlign = 'right';
+            ctx.strokeStyle = 'white';
+            ctx.fillText(myPrice, graphWidth, lastMouseY);
+        }
+
+        function getPriceFromPixelX(pixelX) {
+            var secondsAgo = Math.floor((graphWidth-pixelX)*(maxDataPoints/graphWidth));
+            // dålig lösning att loopa igenom allt för att kolla men......
+            var bestMatch = data[0];
+            var bestDiff = 999999999;
+            for (let i = 0 ; i < data.length ; i++) {
+                var diff = Math.abs(secondsAgo - calculateDifferenceInSeconds(new Date(), labels[i]));
+                if (diff < bestDiff) {
+                    bestMatch = data[i];
+                    bestDiff = diff;
+                }
+            }
+            return bestMatch;
+        }
+        /*
+            * översätter från en viss pixelkoordinat pixelY till ett pris som stämmer med den pixeln 
+            */
+        function getPriceFromPixelY(pixelY) {
+            var graphRange = graphMaxY-graphMinY;
+            var ratio = 1-pixelY/graphHeight
+            return ratio*graphRange+graphMinY;
+        }
+
+            /*
+            * översätter från ett pris price till en pixelkoordinat som stämmer med det priset
+            */
+        function getPixelFromPrice(price) {
+            var graphRange = graphMaxY-graphMinY;
+            var ratio = (price-graphMinY)/graphRange;
+            return  graphHeight - ratio*graphHeight;
+        }
+
+            /*
+            * uppdaterar höjden på grafjäveln så att den alltid rymmer alla priser som finns i data.
+            */
+        function updateGraphYRange() {
+            let maxValue = Math.max(...data);
+            let minValue = Math.min(...data);
+            let priceRange = maxValue-minValue;
+            let graphExtend = priceRange*Math.pow(zoomOutAxisY, 4);
+
+
+            graphMinY = minValue-graphExtend;
+            graphMaxY = maxValue+graphExtend;
+        }
+
+        function fromTimestampToPixelX(timestamp) {
+            var now = new Date();
+            var secondsAgo = calculateDifferenceInSeconds(now, timestamp);
+            var x = graphWidth - secondsAgo*(graphWidth/maxDataPoints);
+            return x;
+        }
+
+        const fetchCoinData = async () => {
+            try {
+                const response = await fetch('@Url.Page("latestprice")');
+                const result = await response.json();
+                currentPrice = result.price.close_price;
+                var timestamp =parseTimestamp( result.price.timestamp);
+
+                // Update labels and data
+                while (labels.length >= maxDataPoints+2 ||
+                    calculateDifferenceInSeconds(new Date(), labels[0]) > maxDataPoints+2) {
+                    labels.shift();
+                    data.shift();
+
+                    if (labels.length <= 0) break;
+                }
+
+
+                data.push(currentPrice);
+                labels.push(timestamp);
+                updateChart();   
+            } catch (error) {
+                console.error('Error fetching coin data:', error);
+            }
+        };
+
+        const updateChart = () => {
+            // Clear canvas
+            updateGraphYRange();
+            ctx.clearRect(0, 0, width, height);
+
+            // Create the gradient for the fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, graphHeight);
+            //gradient.addColorStop(0, 'rgba(25, 98, 139, 0.5)');
+            gradient.addColorStop(0, 'rgba(41, 124, 179, 0.9)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7  )');
+            //gradient.addColorStop(1, 'rgba(13, 39, 56, 1.0  )');
+
+
+            function drawGraphValues() {
                 for (let i = 0 ; i<data.length ; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(fromTimestampToPixelX(labels[i-1]), getPixelFromPrice(data[i-1]) );
                     const x = fromTimestampToPixelX(labels[i]);
                     const y = getPixelFromPrice(data[i]);
-                    ctx.lineTo(x, y);
-                }
-                ctx.lineWidth = 3 //thicker graph line
-                ctx.lineTo(fromTimestampToPixelX(labels[labels.length - 1]), graphHeight);
-                ctx.lineTo(fromTimestampToPixelX(labels[0]), graphHeight);
-                ctx.closePath();
-                ctx.fillStyle = gradient;
-                ctx.fill();
-                
-                // Draw the line on top of the gradient fill
-                for (let i = 0 ; i<data.length ; i++) {
-                        ctx.beginPath();
-                        ctx.moveTo(fromTimestampToPixelX(labels[i-1]), getPixelFromPrice(data[i-1]) );
-                        const x = fromTimestampToPixelX(labels[i]);
-                        const y = getPixelFromPrice(data[i]);
-                        if (calculateDifferenceInSeconds(labels[i], labels[i-1]) > 2) {
-                            ctx.strokeStyle = 'rgba(75, 75, 75, 1)';
-                        } else {
-                            ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
-                        }
-                        ctx.lineTo(x, y);
-                        ctx.stroke();
+                        
+                        console.log(calculateDifferenceInSeconds(labels[i], labels[i-1]));
+                    if (calculateDifferenceInSeconds(labels[i], labels[i-1]) > 2) {
+                        ctx.strokeStyle = 'rgba(75, 75, 75, 1)';
+                    } else {
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
                     }
 
-                // Draw the x axis labels
-                ctx.fillStyle = '#000';
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = 'white';
-                ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
-                ctx.font = '19px Arial';
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                }
+            }
+                
+            // Draw the gradient fill
+            ctx.beginPath();
+            ctx.moveTo(fromTimestampToPixelX(labels[0]), getPixelFromPrice(data[0]) );
+            for (let i = 0 ; i<data.length ; i++) {
+                const x = fromTimestampToPixelX(labels[i]);
+                const y = getPixelFromPrice(data[i]);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineWidth = 3 //thicker graph line
+            ctx.lineTo(fromTimestampToPixelX(labels[labels.length - 1]), graphHeight);
+            ctx.lineTo(fromTimestampToPixelX(labels[0]), graphHeight);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+                
+            // Draw the line on top of the gradient fill
+            for (let i = 0 ; i<data.length ; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(fromTimestampToPixelX(labels[i-1]), getPixelFromPrice(data[i-1]) );
+                    const x = fromTimestampToPixelX(labels[i]);
+                    const y = getPixelFromPrice(data[i]);
+                    if (calculateDifferenceInSeconds(labels[i], labels[i-1]) > 2) {
+                        ctx.strokeStyle = 'rgba(75, 75, 75, 1)';
+                    } else {
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+                    }
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                }
 
-                ctx.beginPath();
-                ctx.moveTo(0, graphHeight);
-                ctx.lineTo(graphWidth, graphHeight);
-                ctx.stroke();
+            // Draw the x axis labels
+            ctx.fillStyle = '#000';
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'white';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+            ctx.font = '19px Arial';
 
-                let maxMinutesAgo = Math.floor(maxDataPoints/60);
+            ctx.beginPath();
+            ctx.moveTo(0, graphHeight);
+            ctx.lineTo(graphWidth, graphHeight);
+            ctx.stroke();
 
-                let spacing = (graphWidth / (maxMinutesAgo));
-                let y = graphHeight + 26;
-                for (let minAgo = maxMinutesAgo ; minAgo >= 0 ; minAgo--) {
-                    let x = graphWidth - spacing * minAgo;
-                    if (minAgo === 0) {
-                        ctx.textAlign = 'center';
-                        ctx.fillText("now", x, y);
+            let maxMinutesAgo = Math.floor(maxDataPoints/60);
+
+            let spacing = (graphWidth / (maxMinutesAgo));
+            let y = graphHeight + 26;
+            for (let minAgo = maxMinutesAgo ; minAgo >= 0 ; minAgo--) {
+                let x = graphWidth - spacing * minAgo;
+                if (minAgo === 0) {
+                    ctx.textAlign = 'center';
+                    ctx.fillText("now", x, y);
+                }
+                else {
+                    if (minAgo === maxMinutesAgo) {
+                        ctx.textAlign = 'left';
                     }
                     else {
-                        if (minAgo === maxMinutesAgo) {
-                            ctx.textAlign = 'left';
-                        }
-                        else {
-                            ctx.textAlign = 'center';
-                        }
-                        ctx.fillText(minAgo+" min ago", x, y);
+                        ctx.textAlign = 'center';
                     }
-
-                    ctx.beginPath();
-                    ctx.moveTo(x, graphHeight);
-                    ctx.lineTo(x, graphHeight+10);
-                    ctx.stroke();
+                    ctx.fillText(minAgo+" min ago", x, y);
                 }
-                
-
-                // Draw the y axis labels
-                numOfLabels = 10;
 
                 ctx.beginPath();
-                ctx.moveTo(graphWidth, 0);
-                ctx.lineTo(graphWidth, graphHeight);
+                ctx.moveTo(x, graphHeight);
+                ctx.lineTo(x, graphHeight+10);
+                ctx.stroke();
+            }
+                
+
+            // Draw the y axis labels
+            numOfLabels = 10;
+
+            ctx.beginPath();
+            ctx.moveTo(graphWidth, 0);
+            ctx.lineTo(graphWidth, graphHeight);
+            ctx.stroke();
+
+            ctx.font = '19px Arial';
+            ctx.textAlign = 'left';
+            for (let i = 1 ; i<numOfLabels ; i++) {
+                    ctx.beginPath();
+                    let y = graphHeight-i*(graphHeight/numOfLabels)
+                    let x = graphWidth;
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x+10, y);
+                    ctx.stroke();
+                    let price = getPriceFromPixelY(y);
+                        
+                    ctx.fillText(Number(price).toFixed(2), x+20, y);
+            }
+
+            //draw the orders
+            ctx.strokeStyle = 'rgba(41, 124, 179, 1)';
+            ctx.textAlign = 'right';
+            limitOrders.forEach((order) => {
+                ctx.beginPath();
+                let y = getPixelFromPrice(order);
+                ctx.moveTo(0, y);
+                ctx.lineTo(graphWidth, y);
                 ctx.stroke();
 
-                ctx.font = '19px Arial';
-                ctx.textAlign = 'left';
-                for (let i = 1 ; i<numOfLabels ; i++) {
-                        ctx.beginPath();
-                        let y = graphHeight-i*(graphHeight/numOfLabels)
-                        let x = graphWidth;
-                        ctx.moveTo(x, y);
-                        ctx.lineTo(x+10, y);
-                        ctx.stroke();
-                        let price = getPriceFromPixelY(y);
-                        
-                        ctx.fillText(Number(price).toFixed(2), x+20, y);
-                }
+                ctx.fillText(Number(order).toFixed(2), graphWidth, y);
+            });
 
-                //draw the orders
-                ctx.strokeStyle = 'rgba(41, 124, 179, 1)';
-                ctx.textAlign = 'right';
-                limitOrders.forEach((order) => {
-                    ctx.beginPath();
-                    let y = getPixelFromPrice(order);
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(graphWidth, y);
-                    ctx.stroke();
-
-                    ctx.fillText(Number(order).toFixed(2), graphWidth, y);
-                });
-
-                //draw lines and text on mouse
-                drawMouseTooltip();
+            //draw lines and text on mouse
+            drawMouseTooltip();
 
 
-                  //upddate market order price
-                 if (document.getElementById('marketType').value === "market") {
-                    price.disabled = true
-                    document.getElementById('price').value = currentPrice;
-                } else {
-                    price.disabled = false
-                }
-                };
+                //upddate market order price
+                if (document.getElementById('marketType').value === "market") {
+                price.disabled = true
+                document.getElementById('price').value = currentPrice;
+            } else {
+                price.disabled = false
+            }
+            };
 
 
 
-            // Fetch new data every second
-            setInterval(fetchCoinData, 1000);
-        });
+        // Fetch new data every second
+        setInterval(fetchCoinData, 1000);
 
 
 
@@ -689,23 +682,13 @@
             $.getJSON('Position/GetOpenPosition', (data) => {
                 console.log(data)
                 if (Object.hasOwn(data, 'error')) { return }
-                // GetQuantity() * ((1 / GetAvgEntryPrice()) - (1 / price));
-                //{avgPrice: 272986.07, sumAmount: 813}
 
-                
-                // TODO: Kolla med Gustav om det går att få tag i myPrice variabeln eller liknande på något annat sätt
-                //document.getElementById('pAndl').innerHTML = data.sumAmount * ((1 / data.avgPrice - (1 / myPrice)))
+                let pAndL = data.sumAmount * ((1 / data.avgPrice - (1 / myPrice))).toFixed(8)
+                let el = document.getElementById('pAndl')
+                el.innerHTML = pAndL + "&#8383;"
 
-                // Fullösning
-                let sumAmount = data.sumAmount, avgPrice = data.avgPrice
-                $.getJSON('LatestPrice', (priceData) => {
-                    let pAndL = sumAmount * ((1 / avgPrice - (1 / priceData.price.close_price))).toFixed(8)
-                    let el = document.getElementById('pAndl')
-                    el.innerHTML = pAndL + "&#8383;"
-
-                    if (pAndL >= 0) el.style.color = "#a8dfac"
-                    else el.style.color = "#dfa8a8"
-                })
+                if (pAndL >= 0) el.style.color = "#a8dfac"
+                else el.style.color = "#dfa8a8" 
             })
         }, 1000);
 
