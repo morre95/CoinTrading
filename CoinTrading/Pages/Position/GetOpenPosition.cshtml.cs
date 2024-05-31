@@ -22,7 +22,7 @@ namespace CoinTrading.Pages.Position
             if (pos != null)
             {
                 //IQueryable<Orders> orders = db.Orders.FromSql($"SELECT *, AVG(open_price) AS avg_price, SUM(amount) AS amount_sum FROM orders WHERE positionid = {pos.Id}");
-                var order = db.Orders.GroupBy(x => true).Select(o => new { avgPrice = o.Average(x => x.OpenPrice), sumAmount = o.Sum(x => x.Amount) }).FirstOrDefault();
+                var order = db.Orders.GroupBy(x => true).Select(o => new { avgPrice = o.Average(x => x.OpenPrice), sumAmount = o.Sum(x => x.Amount), balance = HttpContext.Session.GetBalance() }).FirstOrDefault();
 
                 
                 if (order != null) return new JsonResult(order);

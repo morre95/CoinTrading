@@ -44,6 +44,8 @@ class Manager:
         async for message in websocket:
             self.handle_text_message_received(message)
     
+    # TBD: Det kan vara bra att lägga till en ping här. Tror inte det är någon fara dock när vi kör med btc och ännu mindre om vi skulle bpolande in flera mynt. 
+    # Men om det inte kommer någon uppdatering på 10 minuter nu så kommer binence atomatiskt avsluta prenumerationen om vi inte kör en ping innan 10 minuters preioden gått ut
     def handle_text_message_received(self, message):
         data = json.loads(message)
         if 'result' in data and data['result'] == None:

@@ -136,13 +136,13 @@
                         <div class="trade-form-overlay">
                             <a href="./Login" class="overlay-login">Login to trade</a>
                         </div>
-                        <input type="hidden" id="price">
-                        <input type="hidden" id="marketType">
+                        <input type="hidden" id="buy-price">
+                        <input type="hidden" id="buy-marketType">
                     }
                     <!-- Buy Order Type -->
                     <div class="form-group">
-                        <label for="marketType">Order Type</label>
-                        <select id="marketType" name="marketType" class="form-control" @(!Model.IsLoegin ? "disabled" : "")>
+                        <label for="buy-marketType">Order Type</label>
+                        <select id="buy-marketType" name="buy-marketType" class="form-control" @(!Model.IsLoegin ? "disabled" : "")>
                             <option value="market">Market</option>
                             <option value="limit">Limit</option>
                         </select>
@@ -150,8 +150,8 @@
 
                     <!-- Buy Leverage -->
                     <div class="form-group">
-                        <label for="leverage">Leverage</label>
-                        <select id="leverage" name="leverage" class="form-control" disabled>
+                        <label for="buy-leverage">Leverage</label>
+                        <select id="buy-leverage" name="buy-leverage" class="form-control" disabled>
                             <!-- TODO: lägg till disabled ifstatsen när det är dagst att köra med leverage skarpt -->
                             @for (int i = 1; i <= 100; i++)
                             {
@@ -169,33 +169,26 @@
 
                     <!-- Buy Price -->
                     <div class="form-group">
-                        <label for="price">Price</label>
-                        <input type="number" step="0.01" id="price" name="price" class="form-control" placeholder="Price" @(!Model.IsLoegin ? "disabled" : "")>
+                        <label for="buy-price">Price</label>
+                        <input type="number" step="0.01" id="buy-price" name="buy-price" class="form-control" placeholder="Price" @(!Model.IsLoegin ? "disabled" : "")>
                     </div>
 
                     <!-- Buy Amount -->
                     <div class="form-group">
-                        <label for="amount">Amount</label> <small id="total-value"></small>
-                        <input type="text" id="amount" name="amount" class="form-control" placeholder="Amount" @(!Model.IsLoegin ? "disabled" : "")>
+                        <label for="buy-amount">Amount</label> <small id="total-value"></small>
+                        <input type="text" id="buy-amount" name="buy-amount" class="form-control" placeholder="Amount" @(!Model.IsLoegin ? "disabled" : "")>
                     </div>
 
                     <!-- Buy Button -->
                     <div class="buysell-buttons">
-                        <button class="btn btn-success buy-sell-btn" @(!Model.IsLoegin ? "disabled" : "")>Buy</button>
+                        <button class="btn btn-success buy-btn" @(!Model.IsLoegin ? "disabled" : "")>Buy</button>
                     </div>
                 </div>
             </div>
             <!-- Sell pane -->
             <div class="tab-pane" id="sell" role="tabpanel" aria-labelledby="sell-tab">
                 <div class="trade-form">
-                    @if (!Model.IsLoegin)
-                    {
-                        <div class="trade-form-overlay">
-                            <a href="./Login" class="overlay-login">Login to trade</a>
-                        </div>
-                        <input type="hidden" id="price">
-                        <input type="hidden" id="marketType">
-                    }
+                    
                     <!-- Sell Order Type -->
                     <div class="form-group">
                         <label for="sell-marketType">Order Type</label>
@@ -238,7 +231,7 @@
 
                     <!-- Sell Button -->
                     <div class="buysell-buttons">
-                        <button class="btn btn-danger buy-sell-btn" @(!Model.IsLoegin ? "disabled" : "")>Sell</button>
+                        <button class="btn btn-danger sell-btn" @(!Model.IsLoegin ? "disabled" : "")>Sell</button>
                     </div>
                 </div>
             </div>
@@ -332,7 +325,8 @@
 
         // Erik la till en klick funktion också
         canvas.addEventListener('click', () => {
-            document.getElementById('price').value = myPrice                
+            document.getElementById('buy-price').value = myPrice                
+            document.getElementById('sell-price').value = myPrice                
         });
 
         function parseTimestamp(timestamp) {
@@ -605,11 +599,12 @@
 
 
                 //upddate market order price
-                if (document.getElementById('marketType').value === "market") {
-                price.disabled = true
-                document.getElementById('price').value = currentPrice;
+            if (document.getElementById('buy-marketType').value === "market" || document.getElementById('sell-marketType').value === "market") {
+                document.getElementById('buy-price').disabled = true
+                document.getElementById('buy-price').value = currentPrice;
+                document.getElementById('sell-price').value = currentPrice;
             } else {
-                price.disabled = false
+                document.getElementById('buy-price').disabled = false
             }
             };
 
@@ -621,12 +616,20 @@
 
 
 
-        const buySellButtons = document.querySelectorAll('.buy-sell-btn')
-        const amount = document.getElementById('amount')
-        const price = document.getElementById('price')
-        const leverage = document.getElementById('leverage')
-        const orderValue = document.getElementById('orderValue')
-        const marketType = document.getElementById('marketType')
+        const buyButton = document.querySelector('.buy-btn')
+        const buyAmount = document.getElementById('buy-amount')
+        const buyPrice = document.getElementById('buy-price')
+        const buyLeverage = document.getElementById('buy-leverage')
+        const buyOrderValue = document.getElementById('buy-orderValue')
+        const buyMarketType = document.getElementById('buy-marketType')
+
+
+        const sellButton = document.querySelector('.sell-btn')
+        const sellAmount = document.getElementById('sell-amount')
+        const sellPrice = document.getElementById('sell-price')
+        const sellLeverage = document.getElementById('sell-leverage')
+        const sellOrderValue = document.getElementById('sell-orderValue')
+        const sellMarketType = document.getElementById('sell-marketType')
 
         function urlBuilder(base, parmas) {
             let buildUrl = function (base, key, value) {
@@ -642,40 +645,65 @@
             return base;
         }
 
-        function changeTotalValue() {
-            let p = parseFloat(price.value)
-            let a = parseFloat(amount.value)
-            let l = parseInt(leverage.value)
+        function changeBuyTotalValue() {
+            let p = parseFloat(buyPrice.value)
+            let a = parseFloat(buyAmount.value)
+            let l = parseInt(buyLeverage.value)
             if (Number.isFinite(p) && Number.isFinite(a) && Number.isInteger(l)) {
                 document.getElementById('total-value').innerHTML = `: ${(a / p).toFixed(8)} &#8383;` /*`: ${((a / p) * l).toFixed(8)} &#8383;`*/
             }
         }
 
-        price.addEventListener('change', changeTotalValue)
-        amount.addEventListener('input', changeTotalValue)
-        leverage.addEventListener('change', changeTotalValue)
+        buyPrice.addEventListener('change', changeBuyTotalValue)
+        buyAmount.addEventListener('input', changeBuyTotalValue)
+        buyLeverage.addEventListener('change', changeBuyTotalValue)
 
-        buySellButtons.forEach((element) => {
-            element.addEventListener('click', (e) => {
 
-                e.preventDefault();
+        function changeSellTotalValue() {
+            let p = parseFloat(sellPrice.value)
+            let a = parseFloat(sellAmount.value)
+            let l = parseInt(sellLeverage.value)
+            if (Number.isFinite(p) && Number.isFinite(a) && Number.isInteger(l)) {
+                document.getElementById('total-value').innerHTML = `: ${(a / p).toFixed(8)} &#8383;` /*`: ${((a / p) * l).toFixed(8)} &#8383;`*/
+            }
+        }
 
-                let side = e.target.innerText.toLowerCase()
+        sellPrice.addEventListener('change', changeSellTotalValue)
+        sellAmount.addEventListener('input', changeSellTotalValue)
+        sellLeverage.addEventListener('change', changeSellTotalValue)
 
-                console.log(side)
-
-                $.getJSON(urlBuilder("Position/OpenPosition", { amount: parseFloat(amount.value), price: parseFloat(price.value), leverage: parseInt(leverage.value), side: side, type: marketType.value.toLowerCase() }), function (data) {
-                    if (Object.hasOwn(data, 'error')) {
-                        console.log(data.error)
-                    } else if (data.type.toLowerCase() === "market") {
-                        document.getElementById('balance').innerHTML = `$${data.balance}`
-                        document.getElementById('entryPrice').innerHTML = `$${data.averageEntry}`
-                        document.getElementById('orderValue').innerHTML = `$${data.orderValue.toFixed(8)}`
-                        document.getElementById('pAndl').innerHTML = `$${data.pAndL}`
-                        console.log(data)
-                    }
-                })
+        function sendOrder(side, amountEl, priceEl, leverageEl, typEl) {
+            $.getJSON(urlBuilder(`Position/${side}Position`, { amount: parseFloat(amountEl.value), price: parseFloat(priceEl.value), leverage: parseInt(leverageEl.value), side: side, type: typEl.value.toLowerCase() }), function (data) {
+                if (Object.hasOwn(data, 'error')) {
+                    alert(data.error)
+                    console.log(data.error)
+                } else if (data.type.toLowerCase() === "market") {
+                    document.getElementById('balance').innerHTML = `$${data.balance}`
+                    document.getElementById('entryPrice').innerHTML = `$${data.averageEntry}`
+                    document.getElementById('orderValue').innerHTML = `$${data.orderValue.toFixed(8)}`
+                    document.getElementById('pAndl').innerHTML = `$${data.pAndL.toFixed(8)}`
+                    console.log(data)
+                }
             })
+        }
+
+
+        buyButton.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let side = e.target.innerText.toLowerCase()
+            console.log(side + " order")
+
+            sendOrder(side, buyAmount, buyPrice, buyLeverage, buyMarketType)
+        })
+
+        sellButton.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let side = e.target.innerText.toLowerCase()
+            console.log(side + " order")
+
+            sendOrder(side, sellAmount, sellPrice,sellLeverage, sellMarketType)
         })
 
         setInterval(() => {
@@ -683,12 +711,16 @@
                 console.log(data)
                 if (Object.hasOwn(data, 'error')) { return }
 
-                let pAndL = data.sumAmount * ((1 / data.avgPrice - (1 / currentPrice))).toFixed(8)
+                let pAndL = (data.sumAmount * ((1 / data.avgPrice - (1 / currentPrice)))).toFixed(8)
                 let el = document.getElementById('pAndl')
-                el.innerHTML = pAndL + "&#8383;"
+                el.innerHTML = pAndL + "&#8383; <br>" + `$${(pAndL * currentPrice).toFixed(2)}`
+
+                document.getElementById('balance').innerHTML = `$${data.balance.toFixed(2)}`
+                document.getElementById('entryPrice').innerHTML = `$${data.avgPrice.toFixed(2)}`
+                document.getElementById('orderValue').innerHTML = `$${data.sumAmount.toFixed(2)}`
 
                 if (pAndL >= 0) el.style.color = "#a8dfac"
-                else el.style.color = "#dfa8a8" 
+                else el.style.color = "#dfa8a8"
             })
         }, 1000);
 
