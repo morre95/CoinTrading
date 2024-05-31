@@ -31,23 +31,26 @@ async def get_binance_price(symbol):
 
     async with websockets.connect(uri) as websocket:
         while True:
-            response = await websocket.recv()
-            data = json.loads(response)
-            close_price = data['c']
-            open_price = data['o']
-            high_price = data['h']
-            low_price = data['l']
-            print(f"{symbol.upper()} - Close: {close_price} USD, Open: {open_price} USD, High: {high_price} USD, Low: {low_price} USD")
+            try:
+                response = await websocket.recv()
+                data = json.loads(response)
+                close_price = data['c']
+                open_price = data['o']
+                high_price = data['h']
+                low_price = data['l']
+                print(f"{symbol.upper()} - Close: {close_price} USD, Open: {open_price} USD, High: {high_price} USD, Low: {low_price} USD")
 
-            # Spara priserna i databasen
-            c.execute("INSERT INTO prices (symbol, open_price, close_price, high_price, low_price) VALUES (?, ?, ?, ?, ?)", 
-                      (symbol.upper(), open_price, close_price, high_price, low_price))
-            conn.commit()
+                # Spara priserna i databasen
+                c.execute("INSERT INTO prices (symbol, open_price, close_price, high_price, low_price) VALUES (?, ?, ?, ?, ?)", 
+                        (symbol.upper(), open_price, close_price, high_price, low_price))
+                conn.commit()
 
-            c.execute("DELETE FROM prices WHERE timestamp < DATETIME('now', '-400 seconds')")
-            conn.commit()
+                c.execute("DELETE FROM prices WHERE timestamp < DATETIME('now', '-400 seconds')")
+                conn.commit()
 
-            await asyncio.sleep(1)
+                await asyncio.sleep(1)
+            except:
+                get_binance_price(symbol)
 
 if __name__ == "__main__":
     symbol = "btcusdt"
