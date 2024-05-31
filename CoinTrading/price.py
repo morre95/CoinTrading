@@ -29,14 +29,25 @@ conn.commit()
 class Manager:
     def __init__(self):
         self.url = "wss://stream.binance.com:9443/ws"
-        
+        self.max_retries = 5
+        self.retry_delay = 5
+
     async def start(self):
-        async with websockets.connect(self.url) as websocket:
-            await self.subscribe(websocket)
-            await self.listen(websocket)
-    
+        retries = 0
+        while retries < self.max_retries:
+            try:
+                async with websockets.connect(self.url) as websocket:
+                    await self.subscribe(websocket)
+                    await self.listen(websocket)
+            except websockets.ConnectionClosed:
+                retries += 1
+                print(f"Connection lost, trying to reconnect ({retries}/{self.max_retries})...")
+                await asyncio.sleep(self.retry_delay)
+            else:
+                retries = 0
+
     async def subscribe(self, websocket):
-        info = {"method": "SUBSCRIBE", "params": ["btcusdt@miniTicker"], "id": 1}
+        info = {"method": "SUBSCRIBE", "params": ["btcusdt@aggTrade"], "id": 1}
         message = json.dumps(info)
         await websocket.send(message)
     
@@ -44,8 +55,8 @@ class Manager:
         async for message in websocket:
             self.handle_text_message_received(message)
     
-    # TBD: Det kan vara bra att lägga till en ping här. Tror inte det är någon fara dock när vi kör med btc och ännu mindre om vi skulle bpolande in flera mynt. 
-    # Men om det inte kommer någon uppdatering på 10 minuter nu så kommer binence atomatiskt avsluta prenumerationen om vi inte kör en ping innan 10 minuters preioden gått ut
+    # TBD: Det kan vara bra att lï¿½gga till en ping hï¿½r. Tror inte det ï¿½r nï¿½gon fara dock nï¿½r vi kï¿½r med btc och ï¿½nnu mindre om vi skulle bpolande in flera mynt. 
+    # Men om det inte kommer nï¿½gon uppdatering pï¿½ 10 minuter nu sï¿½ kommer binence atomatiskt avsluta prenumerationen om vi inte kï¿½r en ping innan 10 minuters preioden gï¿½tt ut
     def handle_text_message_received(self, message):
         data = json.loads(message)
         if 'result' in data and data['result'] == None:
