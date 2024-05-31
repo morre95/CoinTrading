@@ -176,8 +176,8 @@
             const width = canvas.width;
             const height = canvas.height;
             const graphWidth = width-150;
-            const graphHeight = height;
-            const graphStartHeight = 200;
+            const graphStartHeight = 30;
+            const graphHeight = height-graphStartHeight;
             let lastMouseY = 0;
             let lastMouseX = 0;
             let currentPrice = 0;
@@ -304,7 +304,7 @@
             function getPixelFromPrice(price) {
                 var graphRange = graphMaxY-graphMinY;
                 var ratio = (price-graphMinY)/graphRange;
-                return  height - ratio*graphHeight;
+                return  graphHeight - ratio*graphHeight;
             }
 
              /*
@@ -347,9 +347,6 @@
                 updateGraphYRange();
                 ctx.clearRect(0, 0, width, height);
 
-
-                
-
                 // Create the gradient for the fill
                 const gradient = ctx.createLinearGradient(0, 0, 0, graphHeight);
                 //gradient.addColorStop(0, 'rgba(25, 98, 139, 0.5)');
@@ -371,8 +368,8 @@
                 // Draw the gradient fill
                 drawGraphValues()
                 ctx.lineWidth = 3 //thicker graph line
-                ctx.lineTo((graphWidth / maxDataPoints)*(labels.length), height);
-                ctx.lineTo(0, height);
+                ctx.lineTo((graphWidth / maxDataPoints)*(labels.length), graphHeight);
+                ctx.lineTo(0, graphHeight);
                 ctx.closePath();
                 ctx.fillStyle = gradient;
                 ctx.fill();
@@ -387,12 +384,18 @@
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'white';
                 ctx.font = '19px Arial';
+
+                ctx.beginPath();
+                ctx.moveTo(0, graphHeight);
+                ctx.lineTo(graphWidth, graphHeight);
+                ctx.stroke();
+
                 let indexNow = Math.floor(labels.length/60);
                 let minutesAgo = indexNow;
                 labels.forEach((label, index) => {
                     if (index % 60 === 0 || index === labels.length - 1) { // Display label every 60 seconds or at the end
                         const x = (graphWidth / (labels.length - 1)) * index;
-                        const y = height - 20;
+                        const y = graphHeight + 20;
                         if (minutesAgo === 0) {
                             ctx.textAlign = 'right';
                             ctx.fillText("now", x, y);
@@ -412,8 +415,8 @@
                         minutesAgo --;
 
                         ctx.beginPath();
-                        ctx.moveTo(x, height);
-                        ctx.lineTo(x, height-10);
+                        ctx.moveTo(x, graphHeight);
+                        ctx.lineTo(x, graphHeight+10);
                         ctx.stroke();
                     }
                 });
