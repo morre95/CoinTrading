@@ -30,7 +30,7 @@ class Manager:
     def __init__(self):
         self.url = "wss://stream.binance.com:9443/ws"
         self.max_retries = 5
-        self.retry_delay = 5  # Sekunder mellan återanslutningsförsök
+        self.retry_delay = 5
 
     async def start(self):
         retries = 0
