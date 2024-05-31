@@ -177,8 +177,8 @@
             const width = canvas.width;
             const height = canvas.height;
             const graphWidth = width-150;
-            const graphHeight = height;
-            const graphStartHeight = 200;
+            const graphStartHeight = 30;
+            const graphHeight = height-graphStartHeight;
             let lastMouseY = 0;
             let lastMouseX = 0;
             let currentPrice = 0;
@@ -205,13 +205,11 @@
                     const response = await fetch('@Url.Page("prices")');
                     const result = await response.json();
 
-                    for(let i = 0 ; i < result.prices.length && i<maxDataPoints; i++) {
+                    for(let i = 0 ; i < result.prices.length; i++) {
                         var price = result.prices[i].close_price;
-                        var timestamp = result.prices[i].timestamp;
+                        var timestamp = parseTimestamp( result.prices[i].timestamp);
                         data.push(price);
                         labels.push(timestamp);
-
-                        console.log(price);
                     }
                    
                 } catch (error) {
@@ -253,20 +251,42 @@
                 document.getElementById('price').value = myPrice                
             });
 
+            function parseTimestamp(timestamp) {
+                // Split the timestamp into date and time components
+                const [datePart, timePart] = timestamp.split(' ');
+    
+                // Split the date and time into their individual components
+                const [year, month, day] = datePart.split('-').map(Number);
+                const [hours, minutes, seconds] = timePart.split(':').map(Number);
+    
+                // Create and return a new Date object in UTC
+                return new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
+            }
+
+            function calculateDifferenceInSeconds(timestamp1, timestamp2) {
+    
+                // Calculate the difference in milliseconds
+                const differenceInMilliseconds = timestamp1 - timestamp2;
+    
+                // Convert the difference to seconds
+                const differenceInSeconds = differenceInMilliseconds / 1000;
+    
+                return Math.floor(differenceInSeconds);
+            }
             function drawMouseTooltip() {
                 if (!isMouseOnChart) return 0;
                 ctx.beginPath();
                 ctx.moveTo(0, lastMouseY);
-                ctx.lineTo(canvas.width, lastMouseY);
+                ctx.lineTo(graphWidth, lastMouseY);
                 ctx.strokeStyle = 'white';
                 ctx.stroke();
                 
                 ctx.textAlign = 'center';
                 ctx.font = '23px Arial';
                 ctx.fillStyle = 'white';
-                let mousePrice = getPriceFromPixelY(lastMouseY);
                 let verticalOffset = -40;
                 let posY = getPixelFromPrice(getPriceFromPixelX(lastMouseX));
+                let mousePrice = getPriceFromPixelY(lastMouseY);
 
                 ctx.beginPath();
                 ctx.moveTo(lastMouseX, posY);
@@ -275,11 +295,7 @@
                 ctx.stroke();
 
                 myPrice = Number(mousePrice).toFixed(2)
-                ctx.fillText(myPrice, lastMouseX, posY+verticalOffset);
-
-                //document.getElementById('myHoverPrice').innerText = myPrice
-
-
+                ctx.fillText(getPriceFromPixelX(lastMouseX), lastMouseX, posY+verticalOffset);
                 
                 ctx.textAlign = 'right';
                 ctx.strokeStyle = 'white';
@@ -287,9 +303,18 @@
             }
 
             function getPriceFromPixelX(pixelX) {
-                var i = Math.floor(pixelX*(maxDataPoints/graphWidth));
-                console.log( i);
-                return data[i];
+                var secondsAgo = Math.floor((graphWidth-pixelX)*(maxDataPoints/graphWidth));
+                // dålig lösning att loopa igenom allt för att kolla men......
+                var bestMatch = data[0];
+                var bestDiff = 999999999;
+                for (let i = 0 ; i < data.length ; i++) {
+                    var diff = Math.abs(secondsAgo - calculateDifferenceInSeconds(new Date(), labels[i]));
+                    if (diff < bestDiff) {
+                        bestMatch = data[i];
+                        bestDiff = diff;
+                    }
+                }
+                return bestMatch;
             }
             /*
              * översätter från en viss pixelkoordinat pixelY till ett pris som stämmer med den pixeln 
@@ -306,11 +331,11 @@
             function getPixelFromPrice(price) {
                 var graphRange = graphMaxY-graphMinY;
                 var ratio = (price-graphMinY)/graphRange;
-                return  height - ratio*graphHeight;
+                return  graphHeight - ratio*graphHeight;
             }
 
              /*
-             * uppdaterar höjden på grafjäveln så att den alltid rimmer priset som finns i dat.
+             * uppdaterar höjden på grafjäveln så att den alltid rymmer alla priser som finns i data.
              */
             function updateGraphYRange() {
                 let maxValue = Math.max(...data);
@@ -323,18 +348,29 @@
                 graphMaxY = maxValue+graphExtend;
             }
 
+            function fromTimestampToPixelX(timestamp) {
+                var now = new Date();
+                var secondsAgo = calculateDifferenceInSeconds(now, timestamp);
+                var x = graphWidth - secondsAgo*(graphWidth/maxDataPoints);
+                return x;
+            }
+
             const fetchCoinData = async () => {
                 try {
                     const response = await fetch('@Url.Page("latestprice")');
                     const result = await response.json();
                     currentPrice = result.price.close_price;
-                    var timestamp = result.price.timestamp;
+                    var timestamp =parseTimestamp( result.price.timestamp);
 
                     // Update labels and data
-                    if (labels.length >= maxDataPoints) {
+                    while (labels.length >= maxDataPoints+2 ||
+                        calculateDifferenceInSeconds(new Date(), labels[0]) > maxDataPoints+2) {
                         labels.shift();
                         data.shift();
+
+                        if (labels.length <= 0) break;
                     }
+
 
                     data.push(currentPrice);
                     labels.push(timestamp);
@@ -349,9 +385,6 @@
                 updateGraphYRange();
                 ctx.clearRect(0, 0, width, height);
 
-
-                
-
                 // Create the gradient for the fill
                 const gradient = ctx.createLinearGradient(0, 0, 0, graphHeight);
                 //gradient.addColorStop(0, 'rgba(25, 98, 139, 0.5)');
@@ -361,64 +394,91 @@
 
 
                 function drawGraphValues() {
-                    ctx.beginPath();
-                    ctx.moveTo(0, getPixelFromPrice(data[0]) );
-                    data.forEach((value, index) => {
-                        const x = (graphWidth / maxDataPoints) * index+1;
-                        const y = getPixelFromPrice(value);
+                    for (let i = 0 ; i<data.length ; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(fromTimestampToPixelX(labels[i-1]), getPixelFromPrice(data[i-1]) );
+                        const x = fromTimestampToPixelX(labels[i]);
+                        const y = getPixelFromPrice(data[i]);
+                        
+                            console.log(calculateDifferenceInSeconds(labels[i], labels[i-1]));
+                        if (calculateDifferenceInSeconds(labels[i], labels[i-1]) > 2) {
+                            ctx.strokeStyle = 'rgba(75, 75, 75, 1)';
+                        } else {
+                            ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+                        }
+
                         ctx.lineTo(x, y);
-                    });
+                        ctx.stroke();
+                    }
                 }
                 
                 // Draw the gradient fill
-                drawGraphValues()
+                ctx.beginPath();
+                ctx.moveTo(fromTimestampToPixelX(labels[0]), getPixelFromPrice(data[0]) );
+                for (let i = 0 ; i<data.length ; i++) {
+                    const x = fromTimestampToPixelX(labels[i]);
+                    const y = getPixelFromPrice(data[i]);
+                    ctx.lineTo(x, y);
+                }
                 ctx.lineWidth = 3 //thicker graph line
-                ctx.lineTo((graphWidth / maxDataPoints)*(labels.length), height);
-                ctx.lineTo(0, height);
+                ctx.lineTo(fromTimestampToPixelX(labels[labels.length - 1]), graphHeight);
+                ctx.lineTo(fromTimestampToPixelX(labels[0]), graphHeight);
                 ctx.closePath();
                 ctx.fillStyle = gradient;
                 ctx.fill();
                 
                 // Draw the line on top of the gradient fill
-                drawGraphValues()
-                ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
-                ctx.stroke();
+                for (let i = 0 ; i<data.length ; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(fromTimestampToPixelX(labels[i-1]), getPixelFromPrice(data[i-1]) );
+                        const x = fromTimestampToPixelX(labels[i]);
+                        const y = getPixelFromPrice(data[i]);
+                        if (calculateDifferenceInSeconds(labels[i], labels[i-1]) > 2) {
+                            ctx.strokeStyle = 'rgba(75, 75, 75, 1)';
+                        } else {
+                            ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+                        }
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+                    }
 
                 // Draw the x axis labels
                 ctx.fillStyle = '#000';
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'white';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
                 ctx.font = '19px Arial';
-                let indexNow = Math.floor(labels.length/60);
-                let minutesAgo = indexNow;
-                labels.forEach((label, index) => {
-                    if (index % 60 === 0 || index === labels.length - 1) { // Display label every 60 seconds or at the end
-                        const x = (graphWidth / (labels.length - 1)) * index;
-                        const y = height - 20;
-                        if (minutesAgo === 0) {
-                            ctx.textAlign = 'right';
-                            ctx.fillText("now", x, y);
-                        }
-                        else if (minutesAgo === 1) {
-                            ctx.textAlign = 'center';
-                            ctx.fillText("1 min ago", x, y);
-                        }
-                        else if (minutesAgo === indexNow) {
+
+                ctx.beginPath();
+                ctx.moveTo(0, graphHeight);
+                ctx.lineTo(graphWidth, graphHeight);
+                ctx.stroke();
+
+                let maxMinutesAgo = Math.floor(maxDataPoints/60);
+
+                let spacing = (graphWidth / (maxMinutesAgo));
+                let y = graphHeight + 26;
+                for (let minAgo = maxMinutesAgo ; minAgo >= 0 ; minAgo--) {
+                    let x = graphWidth - spacing * minAgo;
+                    if (minAgo === 0) {
+                        ctx.textAlign = 'center';
+                        ctx.fillText("now", x, y);
+                    }
+                    else {
+                        if (minAgo === maxMinutesAgo) {
                             ctx.textAlign = 'left';
-                            ctx.fillText(minutesAgo+" min ago", x, y);
                         }
                         else {
                             ctx.textAlign = 'center';
-                            ctx.fillText(minutesAgo+" min ago", x, y);
                         }
-                        minutesAgo --;
-
-                        ctx.beginPath();
-                        ctx.moveTo(x, height);
-                        ctx.lineTo(x, height-10);
-                        ctx.stroke();
+                        ctx.fillText(minAgo+" min ago", x, y);
                     }
-                });
+
+                    ctx.beginPath();
+                    ctx.moveTo(x, graphHeight);
+                    ctx.lineTo(x, graphHeight+10);
+                    ctx.stroke();
+                }
                 
 
                 // Draw the y axis labels
