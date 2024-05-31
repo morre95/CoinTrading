@@ -29,14 +29,25 @@ conn.commit()
 class Manager:
     def __init__(self):
         self.url = "wss://stream.binance.com:9443/ws"
-        
+        self.max_retries = 5
+        self.retry_delay = 5  # Sekunder mellan √•teranslutningsf√∂rs√∂k
+
     async def start(self):
-        async with websockets.connect(self.url) as websocket:
-            await self.subscribe(websocket)
-            await self.listen(websocket)
-    
+        retries = 0
+        while retries < self.max_retries:
+            try:
+                async with websockets.connect(self.url) as websocket:
+                    await self.subscribe(websocket)
+                    await self.listen(websocket)
+            except websockets.ConnectionClosed:
+                retries += 1
+                print(f"Connection lost, trying to reconnect ({retries}/{self.max_retries})...")
+                await asyncio.sleep(self.retry_delay)
+            else:
+                retries = 0
+
     async def subscribe(self, websocket):
-        info = {"method": "SUBSCRIBE", "params": ["btcusdt@miniTicker"], "id": 1}
+        info = {"method": "SUBSCRIBE", "params": ["btcusdt@aggTrade"], "id": 1}
         message = json.dumps(info)
         await websocket.send(message)
     
@@ -44,8 +55,8 @@ class Manager:
         async for message in websocket:
             self.handle_text_message_received(message)
     
-    # TBD: Det kan vara bra att l‰gga till en ping h‰r. Tror inte det ‰r nÂgon fara dock n‰r vi kˆr med btc och ‰nnu mindre om vi skulle bpolande in flera mynt. 
-    # Men om det inte kommer nÂgon uppdatering pÂ 10 minuter nu sÂ kommer binence atomatiskt avsluta prenumerationen om vi inte kˆr en ping innan 10 minuters preioden gÂtt ut
+    # TBD: Det kan vara bra att lÔøΩgga till en ping hÔøΩr. Tror inte det ÔøΩr nÔøΩgon fara dock nÔøΩr vi kÔøΩr med btc och ÔøΩnnu mindre om vi skulle bpolande in flera mynt. 
+    # Men om det inte kommer nÔøΩgon uppdatering pÔøΩ 10 minuter nu sÔøΩ kommer binence atomatiskt avsluta prenumerationen om vi inte kÔøΩr en ping innan 10 minuters preioden gÔøΩtt ut
     def handle_text_message_received(self, message):
         data = json.loads(message)
         if 'result' in data and data['result'] == None:
