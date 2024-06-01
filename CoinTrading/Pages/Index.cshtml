@@ -23,12 +23,10 @@
 
     table#priceTable td.positive-change {
         color: green;
-        
     }
 
     table#priceTable td.negative-change {
         color: red;
-       
     }
 
     .coin-icon {
@@ -55,14 +53,15 @@
 </div>
 
 @section Scripts {
+    @Html.Raw(@"
     <script>
         const coins = [
-            { symbol: 'btcusdt', name: 'BTC', icon: 'Images/btclogo.png', decimalPlaces: 2 },
-            { symbol: 'ethusdt', name: 'ETH', icon: 'Images/eth.png', decimalPlaces: 2 },
-            { symbol: 'bnbusdt', name: 'BNB', icon: 'Images/bnb.png', decimalPlaces: 2 },
-            { symbol: 'xrpusdt', name: 'XRP', icon: 'Images/xrp.png', decimalPlaces: 2 },
-            { symbol: 'dogeusdt', name: 'DOGE', icon: 'Images/doge.png', decimalPlaces: 2 },
-            { symbol: 'shibusdt', name: 'SHIBA INU', icon: 'Images/shiba.png', decimalPlaces: 8 },
+            { symbol: 'btcusdt', name: 'BTC', icon: 'Images/btclogo.png' },
+            { symbol: 'ethusdt', name: 'ETH', icon: 'Images/eth.png' },
+            { symbol: 'bnbusdt', name: 'BNB', icon: 'Images/bnb.png' },
+            { symbol: 'xrpusdt', name: 'XRP', icon: 'Images/xrp.png' },
+            { symbol: 'dogeusdt', name: 'DOGE', icon: 'Images/doge.png' },
+            { symbol: 'shibusdt', name: 'SHIBA INU', icon: 'Images/shiba.png' },
             // Add other coins as needed
         ];
 
@@ -70,7 +69,7 @@
         const ws = new WebSocket('wss://stream.binance.com:9443/ws');
 
         ws.onopen = () => {
-            const params = symbols.map(symbol => `${symbol}@@ticker`);
+            const params = symbols.map(symbol => `${symbol}@ticker`);
             const subscribeMessage = {
                 method: 'SUBSCRIBE',
                 params: params,
@@ -79,44 +78,43 @@
             ws.send(JSON.stringify(subscribeMessage));
         };
 
+        const coinData = {};
+
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            updateTable(data);
+            coinData[data.s.toLowerCase()] = data;
+            updateTable();
         };
 
-        const printCoins {
-            btcusdt: { icon: 'Images/btclogo.png', decimalPlaces: 2, price: 0, change: 0, class: 'positive-change' },
-            ethusdt: { icon: 'Images/eth.png', decimalPlaces: 2, price: 0, change: 0, class: 'positive-change' },
-            bnbusdt: { icon: 'Images/bnb.png', decimalPlaces: 2, price: 0, change: 0, class: 'positive-change' },
-            xrpusdt: { icon: 'Images/xrp.png', decimalPlaces: 2, price: 0, change: 0, class: 'positive-change' },
-            dogeusdt: { icon: 'Images/doge.png', decimalPlaces: 2, price: 0, change: 0, class: 'positive-change' },
-            shibusdt: { icon: 'Images/shiba.png', decimalPlaces: 8, price: 0, change: 0, class: 'positive-change' },
-        }
-
-        const updateTable = (data) => {
-            const coin = coins.find(c => c.symbol.toLowerCase() === data.s.toLowerCase());
-            if (!coin) return;
-
+        const updateTable = () => {
             const table = document.getElementById('priceTable').getElementsByTagName('tbody')[0];
-            let row = document.getElementById(data.s);
+            table.innerHTML = ''; // Clear the table
 
-            if (!row) {
-                row = table.insertRow();
-                row.id = data.s;
+            coins.forEach(coin => {
+                const data = coinData[coin.symbol];
+                if (!data) return;
 
-                const cellCoin = row.insertCell(0);
-                const cellPrice = row.insertCell(1);
-                const cellChange = row.insertCell(2);
+                let row = document.getElementById(data.s);
 
-                cellCoin.innerHTML = `<img src='${coin.icon}' class='coin-icon' alt='${coin.name}'/>${coin.name}`;
-                cellPrice.innerHTML = parseFloat(data.c).toFixed(coin.decimalPlaces);
-                cellChange.innerHTML = `${parseFloat(data.P).toFixed(4)}%`;
-                cellChange.className = parseFloat(data.P) >= 0 ? 'positive-change' : 'negative-change';
-            } else {
-                row.cells[1].innerHTML = parseFloat(data.c).toFixed(coin.decimalPlaces);
-                row.cells[2].innerHTML = `${parseFloat(data.P).toFixed(4)}%`;
-                row.cells[2].className = parseFloat(data.P) >= 0 ? 'positive-change' : 'negative-change';
-            }
+                if (!row) {
+                    row = table.insertRow();
+                    row.id = data.s;
+
+                    const cellCoin = row.insertCell(0);
+                    const cellPrice = row.insertCell(1);
+                    const cellChange = row.insertCell(2);
+
+                    cellCoin.innerHTML = `<img src='${coin.icon}' class='coin-icon' alt='${coin.name}'/>${coin.name}`;
+                    cellPrice.innerHTML = parseFloat(data.c).toFixed(2);
+                    cellChange.innerHTML = `${parseFloat(data.P).toFixed(2)}%`;
+                    cellChange.className = parseFloat(data.P) >= 0 ? 'positive-change' : 'negative-change';
+                } else {
+                    row.cells[1].innerHTML = parseFloat(data.c).toFixed(2);
+                    row.cells[2].innerHTML = `${parseFloat(data.P).toFixed(2)}%`;
+                    row.cells[2].className = parseFloat(data.P) >= 0 ? 'positive-change' : 'negative-change';
+                }
+            });
         };
     </script>
+    ")
 }
