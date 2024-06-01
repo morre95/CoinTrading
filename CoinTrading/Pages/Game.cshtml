@@ -248,6 +248,8 @@
             </div>
         </div>
 
+        <input type="hidden" id="order-value-hidden" />
+
     </div>
 </div>
 @section Scripts {
@@ -770,18 +772,19 @@
             let side = e.target.innerText.toLowerCase()
             console.log(side + " order")
 
-            sendOrder(side, sellAmount, sellPrice,sellLeverage, sellMarketType)
+            sendOrder(side, sellAmount, sellPrice, sellLeverage, sellMarketType)
         })
 
         document.getElementById('close-position').addEventListener('click', (event) => {
             event.preventDefault()
-            $.getJSON('Position/ClosePosition', (data) => {
+            let orderAmount = document.getElementById('order-value-hidden').value
+            $.getJSON('Position/ClosePosition', { amount: parseFloat(orderAmount), price: parseFloat(sellPrice.value), leverage: parseInt(sellLeverage.value) }, (data) => {
                 if (Object.hasOwn(data, 'error')) {
                     alert(data['error'])
                     return 
                 }
 
-
+                console.log(data)
 
             })
         })
@@ -791,13 +794,14 @@
                 console.log(data)
                 if (Object.hasOwn(data, 'error')) { return }
 
-                let pAndL = (data.sumAmount * ((1 / data.avgPrice - (1 / currentPrice)))).toFixed(8)
+                let pAndL = data.sumAmount == 0 ? 0 : (data.sumAmount * ((1 / data.avgPrice - (1 / currentPrice)))).toFixed(8)
                 let el = document.getElementById('pAndl')
                 el.innerHTML = pAndL + "&#8383; <br>" + `$${(pAndL * currentPrice).toFixed(2)}`
 
                 document.getElementById('balance').innerHTML = `$${data.balance.toFixed(2)}`
                 document.getElementById('entryPrice').innerHTML = `$${data.avgPrice.toFixed(2)}`
                 document.getElementById('orderValue').innerHTML = `$${data.sumAmount.toFixed(2)}`
+                document.getElementById('order-value-hidden').value = `${data.sumAmount}`
 
                 if (pAndL >= 0) el.style.color = "#a8dfac"
                 else el.style.color = "#dfa8a8"
