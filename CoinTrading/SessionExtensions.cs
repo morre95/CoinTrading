@@ -1,5 +1,4 @@
 ﻿using CoinTrading.Api;
-using CoinTrading.Pages.Position;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using System.Text.Json;

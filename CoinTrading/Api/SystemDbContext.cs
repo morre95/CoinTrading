@@ -1,5 +1,4 @@
-﻿using CoinTrading.Pages.Position;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 

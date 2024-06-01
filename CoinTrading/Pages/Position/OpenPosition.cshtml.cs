@@ -7,12 +7,6 @@ using System.Text.Json;
 
 namespace CoinTrading.Pages.Position
 {
-    public class CoinPairs
-    {
-        public enum AvailablePair { btcusdt, unknown }
-        public AvailablePair Pair { get; set; }
-        public double Value { get; set; }
-    }
 
     public class OpenPositionModel : PageModel
     {
