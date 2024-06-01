@@ -85,6 +85,15 @@
             updateTable();
         };
 
+        const formatPrice = (price) => {
+            let formattedPrice = parseFloat(price);
+            if (formattedPrice < 1) {
+                return formattedPrice.toFixed(8); // Display 8 decimal places if price is less than 1
+            } else {
+                return formattedPrice.toFixed(2); // Display 2 decimal places if price is 1 or more
+            }
+        };
+
         const updateTable = () => {
             const table = document.getElementById('priceTable').getElementsByTagName('tbody')[0];
             table.innerHTML = ''; // Clear the table
@@ -104,11 +113,11 @@
                     const cellChange = row.insertCell(2);
 
                     cellCoin.innerHTML = `<img src='${coin.icon}' class='coin-icon' alt='${coin.name}'/>${coin.name}`;
-                    cellPrice.innerHTML = parseFloat(data.c).toFixed(2);
+                    cellPrice.innerHTML = formatPrice(data.c);
                     cellChange.innerHTML = `${parseFloat(data.P).toFixed(2)}%`;
                     cellChange.className = parseFloat(data.P) >= 0 ? 'positive-change' : 'negative-change';
                 } else {
-                    row.cells[1].innerHTML = parseFloat(data.c).toFixed(2);
+                    row.cells[1].innerHTML = formatPrice(data.c);
                     row.cells[2].innerHTML = `${parseFloat(data.P).toFixed(2)}%`;
                     row.cells[2].className = parseFloat(data.P) >= 0 ? 'positive-change' : 'negative-change';
                 }
