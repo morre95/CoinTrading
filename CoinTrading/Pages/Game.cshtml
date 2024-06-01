@@ -267,6 +267,7 @@
         let currentPrice = 0;
         let labels = [];
         let data = [];
+        let tradeHistory = [];
 
         let limitOrders = [];
         //lägger till påhittade data för att testa bara
@@ -587,7 +588,7 @@
                     ctx.fillText(Number(price).toFixed(2), x+20, y);
             }
 
-            //draw the orders
+            //draw the limit orders
             ctx.strokeStyle = 'rgba(41, 124, 179, 1)';
             ctx.textAlign = 'right';
             limitOrders.forEach((order) => {
@@ -599,6 +600,43 @@
 
                 ctx.fillText(Number(order).toFixed(2), graphWidth, y);
             });
+
+            // draw the trade history
+            ctx.textAlign = 'center';
+            ctx.font = '21px Arial';
+            tradeHistory.forEach((trade) => {
+                // would be better to have accurate trade date
+                let x = fromTimestampToPixelX(trade.date);
+                let y = getPixelFromPrice(getPriceFromPixelX(x)); 
+                let symbol = 'S';
+                let color = 'rgba(231, 76, 60, 1)';
+                if (trade.side ==='buy') {
+                    symbol = 'B';
+                    color = 'rgba(132, 183, 46, 1)';
+                }
+                ctx.strokeStyle = color;
+
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                let r = 12;
+                y -= r
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                
+                y -= r
+                ctx.fillStyle = 'rgba(34, 34, 34, 1)';
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, 2 * Math.PI);
+                ctx.lineWidth = 2;
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.fillStyle = color;
+                ctx.fillText(symbol, x, y+7);
+
+                console.log(trade.price);
+            });
+
 
             //draw lines and text on mouse
             drawMouseTooltip();
@@ -689,7 +727,12 @@
         sellAmount.addEventListener('input', changeSellTotalValue)
         sellLeverage.addEventListener('change', changeSellTotalValue)
 
+
         function sendOrder(side, amountEl, priceEl, leverageEl, typEl) {
+            //lägg till info i lokal array för att visa historik i grafen
+            //lägger raden överst här just nu för enklare test
+            tradeHistory.push({ side: side, date: new Date(), value: parseFloat(amountEl.value), price: parseFloat(priceEl.value)});
+
             $.getJSON(urlBuilder(`Position/${side}Position`, { amount: parseFloat(amountEl.value), price: parseFloat(priceEl.value), leverage: parseInt(leverageEl.value), side: side, type: typEl.value.toLowerCase() }), function (data) {
                 if (Object.hasOwn(data, 'error')) {
                     alert(data.error)
