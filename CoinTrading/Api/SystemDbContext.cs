@@ -68,7 +68,7 @@ namespace CoinTrading.Api
         public bool IsClosed { get => is_closed == 1; set { is_closed = Convert.ToInt32(value); } }
 
         public int is_closed { get; set; }
-        public DateTime Timestamp { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 
     public class Orders
@@ -86,7 +86,7 @@ namespace CoinTrading.Api
 
         public string? Type { get; set; }
         public string? Side { get; set; }
-        public DateTime Timestamp { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
     public class OtherPrices
     {

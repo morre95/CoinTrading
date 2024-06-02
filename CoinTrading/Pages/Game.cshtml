@@ -682,14 +682,14 @@
         const sellMarketType = document.getElementById('sell-marketType')
 
 
-        function showAlert(message, alerttype = 'info') {
+        function showAlert(message, alerttype = 'info', showSecondes = 2) {
             $('#alert-placeholder').append(`<div id="alertdiv" class="alert alert-${alerttype}" role="alert">${message}</div>`)
             setTimeout(function () {
                 $('#alert-placeholder').addClass('fade-out')
                 setTimeout(function () {
                     $("#alertdiv").remove();
                 }, 0.8);
-            }, 2000);
+            }, 1000 * showSecondes);
         }
 
         function urlBuilder(base, parmas) {
@@ -737,7 +737,7 @@
         function sendOrder(side, amountEl, priceEl, leverageEl, typEl) {
             //lägg till info i lokal array för att visa historik i grafen
             //lägger raden överst här just nu för enklare test
-            tradeHistory.push({ side: side, date: new Date(), value: parseFloat(amountEl.value), price: parseFloat(priceEl.value)});
+            //tradeHistory.push({ side: side, date: new Date(), value: parseFloat(amountEl.value), price: parseFloat(priceEl.value)});
 
             $.getJSON(urlBuilder(`Position/${side}Position`, { amount: parseFloat(amountEl.value), price: parseFloat(priceEl.value), leverage: parseInt(leverageEl.value), side: side, type: typEl.value.toLowerCase() }), function (data) {
                 if (Object.hasOwn(data, 'error')) {
@@ -756,12 +756,31 @@
             })
         }
 
+        function updateHistory(id, side, date, amount, price) {
+            let newItem = { id: id, side: side, date: date, value: amount, price: price }
+            if (tradeHistory.findIndex(item => item.id === newItem.id) === -1) {
+                tradeHistory.push(newItem);
+            }
+        }
+
+        setInterval(() => {
+            $.getJSON('Position/GetPositionHistory', (data) => {
+                //console.log(data)
+                if (Object.hasOwn(data, 'error')) { return }
+
+                let side = 'buy'
+                const date = Date.parse(data[0].timestamp)
+                //console.log(date)
+                data.forEach(d => updateHistory(d.id, side, Date.parse(d.timestamp), d.amount, d.openPrice))
+            })
+        }, 1000);
+
 
         buyButton.addEventListener('click', (e) => {
             e.preventDefault();
 
             let side = e.target.innerText.toLowerCase()
-            console.log(side + " order")
+            //console.log(side + " order")
 
             sendOrder(side, buyAmount, buyPrice, buyLeverage, buyMarketType)
         })
@@ -770,7 +789,7 @@
             e.preventDefault();
 
             let side = e.target.innerText.toLowerCase()
-            console.log(side + " order")
+            //console.log(side + " order")
 
             sendOrder(side, sellAmount, sellPrice, sellLeverage, sellMarketType)
         })
@@ -786,21 +805,33 @@
 
                 console.log(data)
 
+                let msg = data.pAndL >= 0 ? `Congrats!!! Your winnings are: ${data.pAndL.toFixed(8)}&#8383;` : `You closed your position with ${data.pAndL.toFixed(8)}&#8383; loss`
+                showAlert(msg, data.pAndL >= 0 ? 'success' : 'warning', 10)
+
             })
         })
 
         setInterval(() => {
             $.getJSON('Position/GetOpenPosition', (data) => {
-                console.log(data)
+                //console.log(data)
                 if (Object.hasOwn(data, 'error')) { return }
 
                 let pAndL = data.sumAmount == 0 ? 0 : (data.sumAmount * ((1 / data.avgPrice - (1 / currentPrice)))).toFixed(8)
                 let el = document.getElementById('pAndl')
-                el.innerHTML = pAndL + "&#8383; <br>" + `$${(pAndL * currentPrice).toFixed(2)}`
+                el.innerHTML = pAndL + "&#8383;"
 
-                document.getElementById('balance').innerHTML = `$${data.balance.toFixed(2)}`
-                document.getElementById('entryPrice').innerHTML = `$${data.avgPrice.toFixed(2)}`
-                document.getElementById('orderValue').innerHTML = `$${data.sumAmount.toFixed(2)}`
+                let pAndLDollar = data.sumAmount + (pAndL * currentPrice)
+                let dollarBalance = data.balance + pAndLDollar
+
+
+                let USDollar = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                });
+
+                document.getElementById('balance').innerHTML = `${USDollar.format(dollarBalance)}`
+                document.getElementById('entryPrice').innerHTML = `${USDollar.format(data.avgPrice)}`
+                document.getElementById('orderValue').innerHTML = `${USDollar.format(pAndLDollar)}`
                 document.getElementById('order-value-hidden').value = `${data.sumAmount}`
 
                 if (pAndL >= 0) el.style.color = "#a8dfac"
