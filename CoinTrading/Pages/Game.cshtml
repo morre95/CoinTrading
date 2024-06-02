@@ -683,11 +683,14 @@
 
 
         function showAlert(message, alerttype = 'info', showSecondes = 2) {
-            $('#alert-placeholder').append(`<div id="alertdiv" class="alert alert-${alerttype}" role="alert">${message}</div>`)
+            console.log("Alert: " + alerttype)
+            console.log("Sec before delete: " + showSecondes)
+            let elementToDelete = $('#alert-placeholder').append(`<div class="alert alert-${alerttype}" role="alert">${message}</div>`)
             setTimeout(function () {
                 $('#alert-placeholder').addClass('fade-out')
                 setTimeout(function () {
-                    $("#alertdiv").remove();
+                    elementToDelete.remove();
+                    //alert('Element deleted')
                 }, 0.8);
             }, 1000 * showSecondes);
         }
@@ -734,6 +737,32 @@
         sellLeverage.addEventListener('change', changeSellTotalValue)
 
 
+        function handleSellOrders(data) {
+            if (Object.hasOwn(data, 'error')) { return }
+
+            let pAndL = data.sumAmount == 0 ? 0 : (data.sumAmount * ((1 / data.avgPrice - (1 / currentPrice)))).toFixed(8)
+            let el = document.getElementById('pAndl')
+            el.innerHTML = pAndL + "&#8383;"
+
+            let pAndLDollar = data.sumAmount + (pAndL * currentPrice)
+            let dollarBalance = data.balance + pAndLDollar
+
+
+            let USDollar = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            });
+
+            document.getElementById('balance').innerHTML = `${USDollar.format(dollarBalance)}`
+            document.getElementById('entryPrice').innerHTML = `${USDollar.format(data.avgPrice)}`
+            document.getElementById('orderValue').innerHTML = `${USDollar.format(pAndLDollar)}`
+            document.getElementById('order-value-hidden').value = `${data.sumAmount}`
+
+            if (pAndL >= 0) el.style.color = "#a8dfac"
+            else el.style.color = "#dfa8a8"
+        }
+
+
         function sendOrder(side, amountEl, priceEl, leverageEl, typEl) {
             //lägg till info i lokal array för att visa historik i grafen
             //lägger raden överst här just nu för enklare test
@@ -743,7 +772,7 @@
                 if (Object.hasOwn(data, 'error')) {
                     alert(data.error)
                     console.log(data.error)
-                } else if (data.type.toLowerCase() === "market") {
+                } else if (side === "buy") {
                     document.getElementById('balance').innerHTML = `$${data.balance}`
                     document.getElementById('entryPrice').innerHTML = `$${data.averageEntry}`
                     document.getElementById('orderValue').innerHTML = `$${data.orderValue.toFixed(8)}`
@@ -752,6 +781,9 @@
 
                     let msg = side === 'buy' ? `You yust bought ${data.orderValue.toFixed(8)}&#8383;` : `You just sold ${data.orderValue.toFixed(8)}&#8383;`
                     showAlert(msg)
+                }
+                else if (side === 'sell') {
+                    handleSellOrders(data)
                 }
             })
         }
@@ -788,10 +820,11 @@
         sellButton.addEventListener('click', (e) => {
             e.preventDefault();
 
-            let side = e.target.innerText.toLowerCase()
+            let side = 'sell'
             //console.log(side + " order")
 
             sendOrder(side, sellAmount, sellPrice, sellLeverage, sellMarketType)
+
         })
 
         document.getElementById('close-position').addEventListener('click', (event) => {
@@ -803,10 +836,11 @@
                     return 
                 }
 
+                console.log("My P&L: " + data.pAndL)
                 console.log(data)
 
                 let msg = data.pAndL >= 0 ? `Congrats!!! Your winnings are: ${data.pAndL.toFixed(8)}&#8383;` : `You closed your position with ${data.pAndL.toFixed(8)}&#8383; loss`
-                showAlert(msg, data.pAndL >= 0 ? 'success' : 'warning', 10)
+                showAlert(msg, data.pAndL >= 0 ? 'success' : 'danger', 10)
 
             })
         })
@@ -816,26 +850,7 @@
                 //console.log(data)
                 if (Object.hasOwn(data, 'error')) { return }
 
-                let pAndL = data.sumAmount == 0 ? 0 : (data.sumAmount * ((1 / data.avgPrice - (1 / currentPrice)))).toFixed(8)
-                let el = document.getElementById('pAndl')
-                el.innerHTML = pAndL + "&#8383;"
-
-                let pAndLDollar = data.sumAmount + (pAndL * currentPrice)
-                let dollarBalance = data.balance + pAndLDollar
-
-
-                let USDollar = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                });
-
-                document.getElementById('balance').innerHTML = `${USDollar.format(dollarBalance)}`
-                document.getElementById('entryPrice').innerHTML = `${USDollar.format(data.avgPrice)}`
-                document.getElementById('orderValue').innerHTML = `${USDollar.format(pAndLDollar)}`
-                document.getElementById('order-value-hidden').value = `${data.sumAmount}`
-
-                if (pAndL >= 0) el.style.color = "#a8dfac"
-                else el.style.color = "#dfa8a8"
+                handleSellOrders(data)
             })
         }, 1000);
 

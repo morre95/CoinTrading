@@ -32,6 +32,7 @@ namespace CoinTrading.Pages.Position
 
                             if (btcValue <= posValue)
                             {
+                                double pAndL = 0;
                                 posValue -= btcValue;
                                 if (posValue == 0)
                                 {
@@ -40,7 +41,7 @@ namespace CoinTrading.Pages.Position
 
                                     var orders = db.Orders.Where(x => x.Positionid == pos.Id).ToList();
 
-                                    double pAndL = 0;
+                                    
                                     orders.ForEach(o =>
                                     {
                                         double btcValue = o.Amount / o.OpenPrice;
@@ -56,6 +57,8 @@ namespace CoinTrading.Pages.Position
 
                                 // TODO: Någon slags loop här som går igenom tabellen och tömmer ordrar tills amount variabeln är på noll
                                 // Exempel...
+                                pAndL = 0;
+                                double totalOrderValue = 0;
                                 foreach (var item in db.Orders.Where(x => x.Positionid == pos.Id))
                                 {
                                     if (item.Amount < amount)
@@ -66,21 +69,40 @@ namespace CoinTrading.Pages.Position
                                         db.SaveChanges();
 
                                         // TBD: P&L bär räknas ut på någe vis här...???
+                                        btcValue = item.Amount / item.OpenPrice;
+                                        double averageEntry = item.Amount / btcValue;
+                                        pAndL += item.Amount * ((1 / averageEntry) - (1 / price));
+
+                                        totalOrderValue += item.Amount;
 
                                     }
                                     else if (item.Amount >= amount)
                                     {
+                                        // TBD: Ska detta sparas???
+                                        //pos.IsClosed = true;
+                                        //db.SaveChanges();
+
+                                        CoinPairs[] coinBalance = [new()];
+                                        coinBalance[0].Pair = CoinPairs.AvailablePair.btcusdt;
+                                        coinBalance[0].Value = 0;
+                                        HttpContext.Session.SetCoinBalance(coinBalance);
+
+                                        user.Balance += pAndL * price + totalOrderValue;
+                                        user.CoinBlances = coinBalance;
+                                        db.SaveChanges();
+
+                                        HttpContext.Session.SetBalance(user.Balance);
+
                                         // TBD: kanske partialClosePrice ska finnas med här eller P&L???
                                         item.Amount -= amount;
                                         db.SaveChanges();
 
-                                        // TODO: räkna ut p&l här och returnera det
-                                        return new JsonResult(new { success = $"Part of your order is closed" });
+                                        // TODO: räkna ut p&l för delar av ordern
+                                        return new JsonResult(new { success = $"Part of your order is closed", pAndL });
                                     }
                                 }
 
-                                // TBD: Borde alldrig komma hit???
-                                return new JsonResult(new { success = $"Year order is still open." });
+                                return new JsonResult(new { success = $"Year order is still open.", pAndL });
                             }
                             else
                             {

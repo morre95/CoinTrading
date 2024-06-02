@@ -52,14 +52,16 @@ namespace CoinTrading.Pages.Position
                         pos.IsClosed = true;
                         db.SaveChanges();
 
+                        CoinPairs[] coinBalance = [new()];
+                        coinBalance[0].Pair = CoinPairs.AvailablePair.btcusdt;
+                        coinBalance[0].Value = 0;
+                        HttpContext.Session.SetCoinBalance(coinBalance);
+
                         user.Balance += pAndL * price + totalOrderValue;
+                        user.CoinBlances = coinBalance;
                         db.SaveChanges();
 
                         HttpContext.Session.SetBalance(user.Balance);
-
-                        CoinPairs[]? coinBalance = HttpContext.Session.GetCoinBalance();
-                        coinBalance[0].Value = 0;
-                        HttpContext.Session.SetCoinBalance(coinBalance);
 
                         return new JsonResult(new { success = $"Your order is closed", pAndL });
 
