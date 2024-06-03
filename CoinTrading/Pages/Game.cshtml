@@ -491,7 +491,6 @@
                     const x = fromTimestampToPixelX(labels[i]);
                     const y = getPixelFromPrice(data[i]);
                         
-                        console.log(calculateDifferenceInSeconds(labels[i], labels[i-1]));
                     if (calculateDifferenceInSeconds(labels[i], labels[i-1]) > 2) {
                         ctx.strokeStyle = 'rgba(75, 75, 75, 1)';
                     } else {
@@ -640,7 +639,6 @@
                 ctx.fillStyle = color;
                 ctx.fillText(symbol, x, y+7);
 
-                console.log(trade.price);
             });
 
 
@@ -772,29 +770,36 @@
                 if (Object.hasOwn(data, 'error')) {
                     alert(data.error)
                     console.log(data.error)
-                } else if (side === "buy") {
-                    document.getElementById('balance').innerHTML = `$${data.balance}`
-                    document.getElementById('entryPrice').innerHTML = `$${data.averageEntry}`
-                    document.getElementById('orderValue').innerHTML = `$${data.orderValue.toFixed(8)}`
-                    document.getElementById('pAndl').innerHTML = `$${data.pAndL.toFixed(8)}`
-                    console.log(data)
+                } else {
+                    tradeHistory.push({ side: side, date: new Date(), value: parseFloat(amountEl.value), price: parseFloat(priceEl.value) });
+                    if (side === "buy") {
+                        document.getElementById('balance').innerHTML = `$${data.balance}`
+                        document.getElementById('entryPrice').innerHTML = `$${data.averageEntry}`
+                        document.getElementById('orderValue').innerHTML = `$${data.orderValue.toFixed(8)}`
+                        document.getElementById('pAndl').innerHTML = `$${data.pAndL.toFixed(8)}`
+                        console.log(data)
 
-                    let msg = side === 'buy' ? `You yust bought ${data.orderValue.toFixed(8)}&#8383;` : `You just sold ${data.orderValue.toFixed(8)}&#8383;`
-                    showAlert(msg)
+                        let msg = side === 'buy' ? `You yust bought ${data.orderValue.toFixed(8)}&#8383;` : `You just sold ${data.orderValue.toFixed(8)}&#8383;`
+                        showAlert(msg)
+                    }
+                    else if (side === 'sell') {
+                        handleSellOrders(data)
+                    }
                 }
-                else if (side === 'sell') {
-                    handleSellOrders(data)
-                }
+
             })
         }
 
         function updateHistory(id, side, date, amount, price) {
             let newItem = { id: id, side: side, date: date, value: amount, price: price }
+
+            console.log("try adding");
             if (tradeHistory.findIndex(item => item.id === newItem.id) === -1) {
+                console.log("adding");
                 tradeHistory.push(newItem);
             }
         }
-
+        /*
         setInterval(() => {
             $.getJSON('Position/GetPositionHistory', (data) => {
                 //console.log(data)
@@ -806,7 +811,7 @@
                 data.forEach(d => updateHistory(d.id, side, Date.parse(d.timestamp), d.amount, d.openPrice))
             })
         }, 1000);
-
+        */
 
         buyButton.addEventListener('click', (e) => {
             e.preventDefault();
