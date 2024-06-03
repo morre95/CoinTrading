@@ -77,9 +77,13 @@ namespace CoinTrading.Pages.Position
 
                                         totalOrderValue += item.Amount;
 
-                                        /*Debug.WriteLine(double.IsNaN(pAndL));
-                                        Debug.WriteLine(pAndL > 0);
-                                        Debug.WriteLine(totalOrderValue > 0);*/
+                                        Debug.WriteLine("btcValue: " + btcValue);
+                                        Debug.WriteLine("averageEntry: " + averageEntry);
+                                        Debug.WriteLine("pAndL: " + pAndL);
+                                        Debug.WriteLine("item.Amount: " + item.Amount);
+                                        Debug.WriteLine("price: " + price);
+                                        Debug.WriteLine("item.Amount: " + item.Amount);
+                                        Debug.WriteLine("item.OpenPrice: " + item.OpenPrice);
 
                                     }
                                     else if (item.Amount >= amount)

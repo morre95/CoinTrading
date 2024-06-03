@@ -234,8 +234,13 @@
 
                     <!-- Sell Amount -->
                     <div class="form-group">
-                        <label for="sell-amount">Amount</label> <small id="total-value"></small>
+                        <label for="sell-amount">Amount $</label> <small id="total-value"></small>
                         <input type="text" id="sell-amount" name="sell-amount" class="form-control" placeholder="Amount" @(!Model.IsLoegin ? "disabled" : "")>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sell-amount">Amount &#8383;</label> <small id="total-value"></small>
+                        <input type="text" id="sell-btc-amount" name="sell-btc-amount" class="form-control" placeholder="Amount &#8383;" @(!Model.IsLoegin ? "disabled" : "")>
                     </div>
 
                     <!-- Sell Button -->
@@ -679,6 +684,8 @@
         const sellOrderValue = document.getElementById('sell-orderValue')
         const sellMarketType = document.getElementById('sell-marketType')
 
+        const sellBtcAmount = document.getElementById('sell-btc-amount')
+
 
         function showAlert(message, alerttype = 'info', showSecondes = 2) {
             console.log("Alert: " + alerttype)
@@ -720,11 +727,22 @@
         buyAmount.addEventListener('input', changeBuyTotalValue)
         buyLeverage.addEventListener('change', changeBuyTotalValue)
 
+        sellBtcAmount.addEventListener('input', function () {
+            let p = parseFloat(sellPrice.value)
+            let aBtc = parseFloat(sellBtcAmount.value)
+
+            console.log(aBtc)
+            sellAmount.value = (aBtc * p).toFixed(2)
+        })
+
 
         function changeSellTotalValue() {
             let p = parseFloat(sellPrice.value)
             let a = parseFloat(sellAmount.value)
             let l = parseInt(sellLeverage.value)
+
+            sellBtcAmount.value = (a / p).toFixed(8)
+
             if (Number.isFinite(p) && Number.isFinite(a) && Number.isInteger(l)) {
                 document.getElementById('total-value').innerHTML = `: ${(a / p).toFixed(8)} &#8383;` /*`: ${((a / p) * l).toFixed(8)} &#8383;`*/
             }
