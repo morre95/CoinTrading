@@ -283,7 +283,7 @@
         let limitOrders = [];
         //lägger till påhittade data för att testa bara
         limitOrders.push(68000.0);
-        limitOrders.push(69000.0);
+        limitOrders.push(69000.0);  
 
         let zoomOutAxisY = 0.75;
         let graphMinY = 0;
@@ -853,6 +853,7 @@
         document.getElementById('close-position').addEventListener('click', (event) => {
             event.preventDefault()
             let orderAmount = document.getElementById('order-value-hidden').value
+            tradeHistory.push({ side: "sell", date: new Date(), value: 9999999, price: 999999 });
             $.getJSON('Position/ClosePosition', { amount: parseFloat(orderAmount), price: parseFloat(sellPrice.value), leverage: parseInt(sellLeverage.value) }, (data) => {
                 if (Object.hasOwn(data, 'error')) {
                     alert(data['error'])
