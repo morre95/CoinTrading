@@ -77,6 +77,10 @@ namespace CoinTrading.Pages.Position
 
                                         totalOrderValue += item.Amount;
 
+                                        /*Debug.WriteLine(double.IsNaN(pAndL));
+                                        Debug.WriteLine(pAndL > 0);
+                                        Debug.WriteLine(totalOrderValue > 0);*/
+
                                     }
                                     else if (item.Amount >= amount)
                                     {
