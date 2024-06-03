@@ -743,7 +743,7 @@
             el.innerHTML = pAndL + "&#8383;"
 
             let pAndLDollar = data.sumAmount + (pAndL * currentPrice)
-            let dollarBalance = data.balance + pAndLDollar
+            let dollarBalance = data.balance //+ pAndLDollar
 
 
             let USDollar = new Intl.NumberFormat('en-US', {
@@ -799,19 +799,19 @@
                 tradeHistory.push(newItem);
             }
         }
-        /*
+        
         setInterval(() => {
             $.getJSON('Position/GetPositionHistory', (data) => {
                 //console.log(data)
                 if (Object.hasOwn(data, 'error')) { return }
 
                 let side = 'buy'
-                const date = Date.parse(data[0].timestamp)
+                //const date = Date.parse(data[0].timestamp)
                 //console.log(date)
                 data.forEach(d => updateHistory(d.id, side, Date.parse(d.timestamp), d.amount, d.openPrice))
             })
         }, 1000);
-        */
+       
 
         buyButton.addEventListener('click', (e) => {
             e.preventDefault();

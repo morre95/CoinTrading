@@ -1,6 +1,8 @@
 using CoinTrading.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace CoinTrading.Pages.Position
 {
@@ -106,7 +108,10 @@ namespace CoinTrading.Pages.Position
                             }
                             else
                             {
-                                return new JsonResult(new { error = $"Your open psoisition is not that big. \nTotal sum of your order: {posValue}\nThe sum of what you try to sell: {btcValue}" });
+                                Debug.WriteLine("Japp denna körs");
+                                return RedirectToPage("/Close/Position", new { amount, price, leverage });
+                                // TODO: Redirecta användaren till close pos här eftersom den försöker sälja för mer
+                                //return new JsonResult(new { error = $"Your open psoisition is not that big. \nTotal sum of your order: {posValue}\nThe sum of what you try to sell: {btcValue}" });
                             }
                         }
                         else
