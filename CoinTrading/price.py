@@ -3,6 +3,7 @@ import asyncio
 import websockets
 import json
 import sqlite3
+import random
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(base_dir, 'Data', 'data.db')
@@ -18,7 +19,7 @@ conn.commit()
 # Skapa en tabell om den inte redan finns
 c.execute('''CREATE TABLE IF NOT EXISTS prices
              (id INTEGER PRIMARY KEY AUTOINCREMENT,
-              symbol TEXT, 
+              symbol TEXT, 	
               open_price REAL, 
               close_price REAL, 
               high_price REAL, 
@@ -26,7 +27,9 @@ c.execute('''CREATE TABLE IF NOT EXISTS prices
               timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 conn.commit()
 
+
 class Manager:
+    randomOffset = 0
     def __init__(self):
         self.url = "wss://stream.binance.com:9443/ws"
         self.max_retries = 5
@@ -67,6 +70,13 @@ class Manager:
             high_price = data['h']
             low_price = data['l']
             symbol = data['s']
+
+            # RANDOM CHEAT TO MAKE GRAPH MORE INTERESTING DURING LOW HOURS
+            scale = 0.001;
+            close_price = float(close_price)
+            self.randomOffset += (random.random()-0.5)*pow(close_price*scale, 1/2).real
+            close_price += self.randomOffset
+
             print(f"{symbol.upper()} - Close: {close_price} USD, Open: {open_price} USD, High: {high_price} USD, Low: {low_price} USD")
             # Spara priserna i databasen
             c.execute("INSERT INTO prices (symbol, open_price, close_price, high_price, low_price) VALUES (?, ?, ?, ?, ?)", 
