@@ -83,6 +83,8 @@ namespace CoinTrading.Pages
             DB.Add(user);
             DB.SaveChanges();
 
+            HttpContext.Session.SetSuccessAlert($"Congrats {user.Username}, you successfully register a user account");
+
             return RedirectToPage("./Index");
         }
 
